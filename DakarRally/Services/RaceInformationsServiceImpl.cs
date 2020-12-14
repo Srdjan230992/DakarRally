@@ -2,6 +2,7 @@
 using DakarRally.Interfaces;
 using DakarRally.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +19,7 @@ namespace DakarRally.Services
         #region Fields
 
         private readonly VehicleDbContext _context;
+        private readonly ILogger _logger;
         private readonly List<string> vehicleTypes = new List<string>(5) { "sportcar", "terraincar", "sportmotorbike", "crossmotorbike", "truck" };
         private readonly List<VehicleStatus> vehicleStatuses = new List<VehicleStatus>(3) { VehicleStatus.NoStatus, VehicleStatus.FinishRace, VehicleStatus.BreakDown };
 
@@ -29,8 +31,9 @@ namespace DakarRally.Services
         /// Initializes a new instance of the <see cref="RaceInformationsServiceImpl"/> class.
         /// </summary>
         /// <param name="context">Vehicle database context.</param>
-        public RaceInformationsServiceImpl(VehicleDbContext context)
+        public RaceInformationsServiceImpl(ILogger<RaceInformationsServiceImpl> logger, VehicleDbContext context)
         {
+            _logger = logger;
             _context = context;
         }
 
@@ -58,6 +61,7 @@ namespace DakarRally.Services
                 case "trucks":
                     return await FindVehiclesFromRace(race.Year).OrderBy(x => x.Rank).Where(t => t.Type.ToLower() == "truck").ToListAsync();
                 default:
+                    _logger.LogInformation("Race type is not valid!");
                     throw new Exception("Race type is not valid!");
             }
             throw new NullReferenceException("Race is not found!");
@@ -99,8 +103,26 @@ namespace DakarRally.Services
             }
             else
             {
+                _logger.LogInformation("Race not found!");
                 throw new NullReferenceException("Race not found!");
             }
+
+            PopulateVehicleStatusToNumberOfVehicles(status);
+            PopulateVehicleTypeToNumberOfVehicles(status);
+           
+            return status;
+        }
+
+        #endregion
+
+        #region Private methods
+
+        /// <summary>
+        /// Vehicle status to number of vehicles mapping.
+        /// </summary>
+        /// <param name="status">Race status.</param>
+        private void PopulateVehicleStatusToNumberOfVehicles(RaceStatus status)
+        {
             foreach (var vehicleStatus in vehicleStatuses)
             {
                 var vehicles = _context.Vehicles.Where(v => v.VehicleStatus == vehicleStatus);
@@ -109,6 +131,14 @@ namespace DakarRally.Services
                     status.VehicleStatusToNumberOfVehicles.Add(vehicleStatus.ToString(), vehicles.Count());
                 }
             }
+        }
+
+        /// <summary>
+        /// Vehicle type to number of vehicles mapping.
+        /// </summary>
+        /// <param name="status">Race status.</param>
+        private void PopulateVehicleTypeToNumberOfVehicles(RaceStatus status)
+        {
             foreach (var type in vehicleTypes)
             {
                 var vehicles = _context.Vehicles.Where(v => v.Type == type);
@@ -117,12 +147,7 @@ namespace DakarRally.Services
                     status.VehicleTypeToNumberOfVehicles.Add(type, vehicles.Count());
                 }
             }
-            return status;
         }
-
-        #endregion
-
-        #region Private methods
 
         /// <summary>
         /// Sorts list of vehicles.
@@ -136,14 +161,9 @@ namespace DakarRally.Services
 
             if (string.IsNullOrEmpty(order) && (order != "asc" || order != "desc"))
             {
-                return null;
+                throw new Exception("Invalid order operation!");
             }
-
-            if (order == "desc")
-            {
-                return vehicles.OrderByDescending(x => x.TeamName);
-            }
-            return vehicles.OrderBy(x => x.TeamName);
+            return order == "desc" ? vehicles.OrderByDescending(x => x.TeamName) : vehicles.OrderBy(x => x.TeamName);
         }
 
         /// <summary>
@@ -156,18 +176,8 @@ namespace DakarRally.Services
         private IEnumerable<Vehicle> FilterData(string operation, IEnumerable<Vehicle> vehicles1, IQueryable<Vehicle> vehicles2)
         {
             operation = operation.ToLowerInvariant();
-            if (!string.IsNullOrEmpty(operation) && IsValidOperation(operation))
-            {
-                if (operation == "and")
-                {
-                    return vehicles1.Intersect(vehicles2);
-                }
-                else if (operation == "or")
-                {
-                    return vehicles1.Union(vehicles2);
-                }
-            }
-            return null;
+
+            return IsValidOperation(operation) ? (operation == "and" ? vehicles1.Intersect(vehicles2) : vehicles1.Union(vehicles2)) : null;
         }
 
         /// <summary>
@@ -177,7 +187,7 @@ namespace DakarRally.Services
         /// <returns>true if operation is valid.</returns>
         private bool IsValidOperation(string operation)
         {
-            return (operation.ToLower() == "and" || operation.ToLower() == "or") ? true : false;
+            return (operation == "and" || operation == "or") ? true : false;
         }
 
         /// <summary>

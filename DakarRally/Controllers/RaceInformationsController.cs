@@ -2,6 +2,7 @@
 using DakarRally.Interfaces;
 using DakarRally.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
