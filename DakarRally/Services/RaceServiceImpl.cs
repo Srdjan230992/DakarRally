@@ -6,21 +6,40 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using static DakarRally.Helper.AppHelper;
+using static DakarRally.Helper.AppEnums;
 
 namespace DakarRally.Services
 {
-    public class RaceManager : IRaceManager
+    /// <summary>
+    /// RaceServiceImpl class.
+    /// </summary>
+    public class RaceServiceImpl : IRaceService
     {
+        #region Fields
+
         private readonly VehicleDbContext _context;
         private Random random = new Random();
         private readonly object raceLock = new object();
         private const int startFinishDistance = 10000; //10000km
 
-        public RaceManager(VehicleDbContext context)
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RaceServiceImpl"/> class.
+        /// </summary>
+        /// <param name="context">Race database context.</param>
+        public RaceServiceImpl(VehicleDbContext context)
         {
             _context = context;
         }
+
+        #endregion
+
+        #region Public methods
+
+        /// <inheritdoc/>
         public async Task<int> CreateRace(Race race)
         {
             if (ValidateRace(race))
@@ -31,6 +50,7 @@ namespace DakarRally.Services
             return 0;
         }
 
+        /// <inheritdoc/>
         public async Task<int> AddVehicleToRace(Vehicle vehicle)
         {
             if (ValidateVehicle(vehicle))
@@ -41,9 +61,12 @@ namespace DakarRally.Services
             return 0;
         }
 
+        /// <inheritdoc/>
         public async Task<int> UpdateVehicleInfo(Vehicle vehicle)
         {
-            if (vehicle != null && CheckIfVehicleExists(vehicle.Id) && CheckIfRaceIsInPenndingState(vehicle.RaceId))
+            if (!CheckIfVehicleExists(vehicle.Id)) throw new NullReferenceException("Vehicle does not exist!");
+
+            if (CheckIfRaceIsInPendingState(vehicle.RaceId))
             {
                 try
                 {
@@ -52,37 +75,39 @@ namespace DakarRally.Services
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    throw;
+                    throw new Exception("Database error occured!");
                 }
             }
             return 0;
         }
 
+        /// <inheritdoc/>
         public async Task<int> DeleteVehicle(long id)
         {
             var vehicle = await _context.Vehicles.FindAsync(id);
 
-            if (vehicle != null && CheckIfRaceIsInPenndingState(vehicle.RaceId))
+            if (vehicle != null && CheckIfRaceIsInPendingState(vehicle.RaceId))
             {
                 _context.Vehicles.Remove(vehicle);
                 return await _context.SaveChangesAsync();
             }
             return 0;
         }
+
+        /// <inheritdoc/>
         public void StartRace(int raceId)
         {
             lock (raceLock)
             {
                 bool allVehiclesFinished = false;
                 var startTime = DateTime.Now;
-
-                SetRaceState(raceId, RaceState.Running);
                 int rank = 0;
                 var vehicles = FindVehiclesWithRaceId(raceId);
+
+                SetRaceState(raceId, RaceState.Running);                    
                 do
                 {
                     Thread.Sleep(1000); //1h
-
                     foreach (var vehicle in vehicles)
                     {
                         if (!vehicle.VehicleFinishedRace)
@@ -96,34 +121,18 @@ namespace DakarRally.Services
                                 }
                                 if (vehicle.LightMalfunctionCounter == 0)
                                 {
-                                    if (vehicle.PassedDistance + vehicle.VehicleSpeed > startFinishDistance)
-                                    {
-                                        vehicle.PassedDistance += startFinishDistance - vehicle.PassedDistance;
-                                    }
-                                    else
-                                    {
-                                        vehicle.PassedDistance += vehicle.VehicleSpeed;
-                                    }
-
+                                    IncreaseVehicleDistance(vehicle);
                                     if ((vehicle.PassedDistance >= startFinishDistance || CalculateHeavyMalfunctionProbability(vehicle)))
                                     {
                                         vehicle.Rank = rank++;
-                                        vehicle.VehicleFinishedRace = true;
-                                        if(vehicle.VehicleStatus == VehicleStatus.NoStatus)
-                                        {
-                                            vehicle.VehicleStatus = VehicleStatus.FinishRace;
-                                        }
-                                        UpdateDatabase(vehicle);
+                                        FinishRace(vehicle);
                                         allVehiclesFinished = CheckIfRaceFinished(raceId);
                                         if (allVehiclesFinished) break;
                                     }
                                     UpdateDatabase(vehicle);
                                 }
                             }
-                            if (vehicle.LightMalfunctionCounter != 0)
-                            {
-                                vehicle.LightMalfunctionCounter--;
-                            }
+                            DecreaseLightMalfunctionCounter(vehicle);
                         }
                     }
                 } while (!allVehiclesFinished);
@@ -132,45 +141,129 @@ namespace DakarRally.Services
             }
         }
 
-         public async Task<Race> FindRaceById(long raceId)
+        /// <inheritdoc/>
+        public async Task<Race> FindRaceById(long raceId)
         {
             return await _context.Races.FindAsync(raceId);
         }
-       
+
+        /// <inheritdoc/>
         public async Task<Vehicle> FindVehicleById(long vehicleId)
         {
             return await _context.Vehicles.FindAsync(vehicleId);
         }
-        /// <summary>
-        /// Exists and is in pennding state.
-        /// </summary>
-        /// <param name="raceId"></param>
-        /// <returns></returns>
-        private bool CheckIfRaceIsInPenndingState(long raceId)
+
+        /// <inheritdoc/>
+        public bool CheckIfAnyRaceIsRunning()
         {
-            return _context.Races.Any(x => x.Year == raceId && x.State == RaceState.Pending);
+            return _context.Races.All(x => x.State != RaceState.Running) ? false : true;
         }
+
+        #endregion
+
+        #region Private methods
+
+        /// <summary>
+        /// Increases vehicle distance.
+        /// </summary>
+        /// <param name="vehicle">Vehicle.</param>
+        private void IncreaseVehicleDistance(Vehicle vehicle)
+        {
+            if (vehicle.PassedDistance + vehicle.VehicleSpeed > startFinishDistance)
+            {
+                vehicle.PassedDistance += startFinishDistance - vehicle.PassedDistance;
+            }
+            else
+            {
+                vehicle.PassedDistance += vehicle.VehicleSpeed;
+            }
+        }
+
+        /// <summary>
+        /// Decreases malfunction counter for vehicle.
+        /// </summary>
+        /// <param name="vehicle">Vehicle.</param>
+        private void DecreaseLightMalfunctionCounter(Vehicle vehicle)
+        {
+            if (vehicle.LightMalfunctionCounter != 0)
+            {
+                vehicle.LightMalfunctionCounter--;
+            }
+        }
+        /// <summary>
+        /// Finish the race.
+        /// </summary>
+        /// <param name="vehicle">Vehicle/</param>
+        private void FinishRace(Vehicle vehicle)
+        {
+            vehicle.VehicleFinishedRace = true;
+            if (vehicle.VehicleStatus == VehicleStatus.NoStatus)
+            {
+                vehicle.VehicleStatus = VehicleStatus.FinishRace;
+            }
+            UpdateDatabase(vehicle);
+        }
+
+        /// <summary>
+        /// Checks if race exists and is in pennding state.
+        /// </summary>
+        /// <param name="raceId">Race id.</param>
+        /// <returns>true if race is in pending state.</returns>
+        private bool CheckIfRaceIsInPendingState(long raceId)
+        {
+            return _context.Races.Any(x => x.Year == raceId && x.State == RaceState.Pending) ? true : throw new Exception("Race needs to be in pending state!");
+        }
+
+        /// <summary>
+        /// Validates race.
+        /// </summary>
+        /// <param name="race">The race.</param>
+        /// <returns>true if race is valid.</returns>
         private bool ValidateRace(Race race)
         {
-            return (race != null && CheckIfYearIsValid(race.Year) && !CheckIfRaceExists(race.Year)) ? true : false;
+            if (race == null) throw new ArgumentNullException("Race is not found!");
+            return CheckIfRaceExists(race.Year);
         }
+
+        /// <summary>
+        /// Validates vehicle.
+        /// </summary>
+        /// <param name="vehicle">Vehicle.</param>
+        /// <returns>true if vehicle is valid.</returns>
         private bool ValidateVehicle(Vehicle vehicle)
         {
-            return vehicle != null && CheckIfRaceExists(vehicle.RaceId) && !CheckIfVehicleExists(vehicle.Id) && CheckIfRaceIsInPenndingState(vehicle.RaceId);
+            if (CheckIfVehicleExists(vehicle.Id)) throw new Exception("Vehicle already exists!");
+
+            return (CheckIfRaceExists(vehicle.RaceId) && CheckIfRaceIsInPendingState(vehicle.RaceId)) ? true : false;
         }
+
+        /// <summary>
+        /// Checks if race exists.
+        /// </summary>
+        /// <param name="id">Race id.</param>
+        /// <returns>true if race exists.</returns>
         private bool CheckIfRaceExists(long id)
         {
-            return _context.Races.Any(e => e.Year == id);
+            var race = _context.Races.Any(e => e.Year == id);
+            return race ? true : throw new Exception("Race with desired year does not exist!");
         }
+
+        /// <summary>
+        /// Checks if vehicle exists.
+        /// </summary>
+        /// <param name="id">vehicle id.</param>
+        /// <returns>true if vehicle exists.</returns>
         private bool CheckIfVehicleExists(long id)
         {
             return _context.Vehicles.Any(e => e.Id == id);
         }
-        private bool CheckIfYearIsValid(int year)
-        {
-            return (year >= 1970 && year <= 2050) ? true : false;
-        }
-        public bool CalculateHeavyMalfunctionProbability(Vehicle vehicle)
+
+        /// <summary>
+        /// Calculates heavy malfunction probability.
+        /// </summary>
+        /// <param name="vehicle">Vehicle.</param>
+        /// <returns>true if heavy malfunction occured.</returns>
+        private bool CalculateHeavyMalfunctionProbability(Vehicle vehicle)
         {
             if (random.NextDouble() < vehicle.HeavyMalfunctionProbability)
             {
@@ -180,7 +273,13 @@ namespace DakarRally.Services
             }
             return false;
         }
-        public bool CalculateLightMalfunctionProbability(Vehicle vehicle)
+
+        /// <summary>
+        /// Calculates light malfunction probability.
+        /// </summary>
+        /// <param name="vehicle">Vehicle.</param>
+        /// <returns>true if light malfunction occured.</returns>
+        private bool CalculateLightMalfunctionProbability(Vehicle vehicle)
         {
             if (random.NextDouble() < vehicle.LightMalfunctionProbability)
             {
@@ -189,28 +288,52 @@ namespace DakarRally.Services
             }
             return false;
         }
-        public bool CheckIfAnyRaceIsRunning()
-        {
-            return _context.Races.All(x => x.State != RaceState.Running) ? false : true;
-        }
+
+        /// <summary>
+        /// Sets race state.
+        /// </summary>
+        /// <param name="raceId">Race id.</param>
+        /// <param name="state">Desired race state.</param>
         private void SetRaceState(int raceId, RaceState state)
         {
             _context.Races.Where(id => id.Year == raceId).First().State = state;
             _context.SaveChangesAsync();
         }
-        public IQueryable<Vehicle> FindVehiclesWithRaceId(int raceId)
+
+        /// <summary>
+        /// Find vehicle with race id.
+        /// </summary>
+        /// <param name="raceId">Race id.</param>
+        /// <returns>Desired vehicle.</returns>
+        private IQueryable<Vehicle> FindVehiclesWithRaceId(int raceId)
         {
             return _context.Vehicles.Where(id => id.RaceId == raceId);
         }
-        public bool CheckIfRaceFinished(int raceId)
+
+        /// <summary>
+        /// Checks if all vehicles finish the race.
+        /// </summary>
+        /// <param name="raceId">Race id.</param>
+        /// <returns>true id race is finished.</returns>
+        private bool CheckIfRaceFinished(int raceId)
         {
             return _context.Vehicles.Where(id => id.RaceId == raceId).All(x => x.VehicleFinishedRace == true) ? true : false;
         }
-        public void UpdateDatabase(Vehicle vehicle)
+
+        /// <summary>
+        /// Updates database.
+        /// </summary>
+        /// <param name="vehicle">Vehicle.</param>
+        private void UpdateDatabase(Vehicle vehicle)
         {
-            _context.Entry(vehicle).State = EntityState.Modified;//update baze
+            _context.Entry(vehicle).State = EntityState.Modified;
             _context.SaveChangesAsync();
         }
+
+        /// <summary>
+        /// Excludes from update properties which will be dynamicaly changed.
+        /// </summary>
+        /// <param name="vehicle">Vehicle for update.</param>
         private void ExcludePropertiesFromUpdate(Vehicle vehicle)
         {
             _context.Entry(vehicle).State = EntityState.Modified;
@@ -225,6 +348,8 @@ namespace DakarRally.Services
             _context.Entry(vehicle).Property(x => x.VehicleManufaturingDate).IsModified = false;
             _context.Entry(vehicle).Property(x => x.VehicleSpeed).IsModified = false;
         }
+
+        #endregion
 
         public void PopulateInitData()
         {

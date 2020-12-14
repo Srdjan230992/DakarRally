@@ -1,13 +1,18 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using static DakarRally.Helper.AppHelper;
-
-namespace DakarRally.Helper
+﻿namespace DakarRally.Helper
 {
+    /// <summary>
+    /// FilterItem class.
+    /// </summary>
     public class FilterItem
     {
+        /// <summary>
+        /// Field value specificied for filtering.
+        /// </summary>
         public string Field { get; set; }
+
+        /// <summary>
+        /// Logic operation (AND/OR).
+        /// </summary>
         public string LogicOperation { get; set; }
     }
 }

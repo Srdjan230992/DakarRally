@@ -1,110 +1,159 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using DakarRally.Models;
-using System.Threading;
+﻿using DakarRally.Models;
 using DakarRally.Helper;
 using DakarRally.Interfaces;
-using static DakarRally.Helper.AppHelper;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace DakarRally.Controllers
 {
-    [Route("api/Races")]
+    /// <summary>
+    /// The race controller.
+    /// </summary>
+    [Route("api/races")]
     [ApiController]
     public class RacesController : ControllerBase
     {
-        private readonly IRaceManager _raceManager;
+        #region Fields
 
-        public RacesController(IRaceManager raceManager)
+        /// <summary>
+        /// Race service instance.
+        /// </summary>
+        private readonly IRaceService _raceService;
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RacesController"/> class.
+        /// </summary>
+        /// <param name="raceService">Provides race service instance.</param>
+        public RacesController(IRaceService raceService)
         {
-            _raceManager = raceManager;
+            _raceService = raceService;
         }
 
+        #endregion
+
+        #region Routes
+
+        /// <summary>
+        /// Creates a new race.
+        /// </summary>
+        /// <param name="year">Race year.</param>
+        /// <returns>Race informations.</returns>
         // POST: api/Races/Race/1970
-        [HttpPost("Race/{year}")]
-        public async Task<ActionResult<Race>> CreateRace(int year)
+        [HttpPost("race/{year}")]
+        [ValidateActionParameters]
+        public async Task<ActionResult<Race>> Race([Range(1970, 2050)] int year)
         {
             var race = new Race(year);
-            if (await _raceManager.CreateRace(race) != 0)
+            if (await _raceService.CreateRace(race) != 0)
             {    
-                return CreatedAtAction(nameof(FindRace), new { id = race.Year }, race);
+                return CreatedAtAction(nameof(Race), new { id = race.Year }, race);
             }
-            return Content("It is not possible to create Race. Race with the entered year already exists or has invalid year.");
+            return BadRequest("It is not possible to create race!");
         }
 
+        /// <summary>
+        /// Add vehicle to the race.
+        /// </summary>
+        /// <param name="vehicle">New vehicle.</param>
+        /// <returns>Vehicle added to the race.</returns>
         // POST: api/Races/Vehicle
-        [HttpPost("Vehicle")]
-        public async Task<ActionResult<Vehicle>> AddVehicleToRace([ModelBinder(BinderType = typeof(VehicleTypeModelBinder))][FromBody] Vehicle vehicle)
+        [HttpPost("vehicle")]
+        public async Task<ActionResult<Vehicle>> Vehicle([ModelBinder(BinderType = typeof(VehicleTypeModelBinder))][FromBody] Vehicle vehicle)
         {
-            if(await _raceManager.AddVehicleToRace(vehicle) != 0)
+            if(await _raceService.AddVehicleToRace(vehicle) != 0)
             {
-                return CreatedAtAction(nameof(FindViecle), new { id = vehicle.Id }, vehicle);
+                return CreatedAtAction(nameof(Viecle), new { id = vehicle.Id }, vehicle);
             }
-            return Content("It is not possible to add Vehicle. Race with the entered race id does not exist or Race is not in pannding state.");
+            return BadRequest("It is not possible to add vehicle to the race!");
         }
 
+        /// <summary>
+        /// Updates vehicle informations.
+        /// </summary>
+        /// <param name="vehicle">Vehicle informations.</param>
+        /// <returns>Updated vehicle informations.</returns>
         // PUT: api/Races/Vehicle/
-        [HttpPut("Vehicle")]
-        public async Task<IActionResult> UpdateVehicleInfo([ModelBinder(BinderType = typeof(VehicleTypeModelBinder))][FromBody] Vehicle vehicle)
+        [HttpPut("vehicle")]
+        public async Task<IActionResult> VehicleInfo([ModelBinder(BinderType = typeof(VehicleTypeModelBinder))][FromBody] Vehicle vehicle)
         {
-            if (await _raceManager.UpdateVehicleInfo(vehicle) != 0)
+            if (await _raceService.UpdateVehicleInfo(vehicle) != 0)
             {
-                return CreatedAtAction(nameof(FindViecle), new { id = vehicle.Id }, vehicle);
+                return Ok(vehicle);
             }
-            return Content("It is not possible to update Vehicle. Vehicle with the entered id does not exist or Race is not in pannding state.");
+            return BadRequest("It is not possible to update vehicle!");
         }
 
-        // DELETE: api/Vehicles/5
-        [HttpDelete("Vehicle/{id}")]
-        public async Task<IActionResult> DeleteVehicle(long id)
+        /// <summary>
+        /// Delete vehicle.
+        /// </summary>
+        /// <param name="id">Vehicle id.</param>
+        /// <returns>Information if vehicle is deleted.</returns>
+        // DELETE: api/Races/Vehicles/5
+        [HttpDelete("vehicle/{id}")]
+        public async Task<ActionResult> Vehicle(long id)
         {
-            if (await _raceManager.DeleteVehicle(id) != 0)
+            if (await _raceService.DeleteVehicle(id) != 0)
             {
-                return Content("Viecle is successfully deleted!");
+                return Ok("Vehicle is successfully deleted!");
             }
-            return Content("It is not possible to delete Vehicle. Vehicle with the entered id does not exist or Race is not in pannding state.");
+            return BadRequest("It is not possible to delete Vehicle. Vehicle with the entered id does not exist or Race is not in pannding state.");
         }
 
-        // GET: api/Vehicles/StartRace/2020
-        [HttpGet("StartRace/{raceId}")]
-        public void StartRace(int raceId)
+        /// <summary>
+        /// Starts the race.
+        /// </summary>
+        /// <param name="raceId">Race id.</param>
+        // GET: api/Races/StartRace/2020
+        [HttpGet("race/{id}/start")]
+        [ValidateActionParameters]
+        public ActionResult StartRace([Range(1970, 2050)] int id)
         {
-            if (_raceManager.CheckIfAnyRaceIsRunning()) { return; }
+            if (_raceService.CheckIfAnyRaceIsRunning()) { return BadRequest("Any race is already running!"); }
 
-            _raceManager.StartRace(raceId);
+            _raceService.StartRace(id);
+
+            return Ok("Race successfully finished.");
         }
 
-        // GET: api/Races/FindRace/id
-        [HttpGet("FindRace/{id}")]
-        public async Task<ActionResult<Race>> FindRace(long id)
+        /// <summary>
+        /// Find Race by race id.
+        /// </summary>
+        /// <param name="id">Race id.</param>
+        /// <returns>The race.</returns>
+        // GET: api/Races/Race/id
+        [HttpGet("race/{id}")]
+        [ValidateActionParameters]
+        public async Task<ActionResult<Race>> Race([Range(1970, 2050)] long id)
         {
-            var race = await _raceManager.FindRaceById(id);
-            if (race == null)
-            {
-                return NotFound();
-            }
-            return race;
+            var race = await _raceService.FindRaceById(id);
+            return race == null ? NotFound("Race with desired id is not found!") : Ok(race);
         }
 
-        // GET: api/Races/FindViecle/id
-        [HttpGet("FindVehicle/{id}")]
-        public async Task<ActionResult<Vehicle>> FindViecle(long id)
+        /// <summary>
+        /// Find vehicle by id.
+        /// </summary>
+        /// <param name="id">Vehicle id.</param>
+        /// <returns>The vehicle.</returns>
+        // GET: api/Races/Viecle/id
+        [HttpGet("vehicle/{id}")]
+        public async Task<ActionResult<Vehicle>> Viecle(long id)
         {
-            var race = await _raceManager.FindVehicleById(id);
-            if (race == null)
-            {
-                return NotFound();
-            }
-            return race;
+            var vehicle = await _raceService.FindVehicleById(id);
+            return vehicle == null ? NotFound("Vehicle with desired id is not found!") : Ok(vehicle);
         }
 
         // GET: api/Races/PopulateInitData
         [HttpGet("PopulateInitData")]
         public void PopulateInitData()
         {
-            _raceManager.PopulateInitData();
+            _raceService.PopulateInitData();
         }
+
+        #endregion
     }
 }

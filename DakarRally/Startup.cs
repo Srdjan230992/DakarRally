@@ -12,33 +12,36 @@ using Microsoft.OpenApi.Models;
 namespace DakarRally
 {
     /// <summary>
-    /// 
+    /// Startup class.
     /// </summary>
     public class Startup
     {
         /// <summary>
-        /// 
+        /// Initializes a new instance of the <see cref="Startup"/> class.
         /// </summary>
-        /// <param name="configuration"></param>
+        /// <param name="configuration">Application configuration properties.</param>
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
         }
 
+        /// <summary>
+        /// Application configuration properties.
+        /// </summary>
         public IConfiguration Configuration { get; }
 
         /// <summary>
         /// Method gets called by the runtime. This method is used to add services to the container.
         /// </summary>
-        /// <param name="services"></param>
+        /// <param name="services">Collection of services.</param>
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<VehicleDbContext>(opt =>
                                                opt.UseInMemoryDatabase("Vehicles"));
             services.AddControllers();
 
-            services.AddScoped<IRaceInformationsManager, RaceInformationsManager>();
-            services.AddScoped<IRaceManager, RaceManager>();
+            services.AddScoped<IRaceInformationsService, RaceInformationsServiceImpl>();
+            services.AddScoped<IRaceService, RaceServiceImpl>();
 
             services.AddSwaggerGen(c =>
             {
@@ -49,13 +52,15 @@ namespace DakarRally
         /// <summary>
         /// Method gets called by the runtime. This method is used to configure the HTTP request pipeline.
         /// </summary>
-        /// <param name="app"></param>
-        /// <param name="env"></param>
+        /// <param name="app">Mechanism to configure an application's request.</param>
+        /// <param name="env">Information about the web hosting environment an application is running.</param>
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseExceptionHandler("/error");
+
             if (env.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();
+                //app.UseDeveloperExceptionPage();
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "DakarRally v1"));
             }
@@ -64,7 +69,7 @@ namespace DakarRally
 
             app.UseRouting();
 
-            app.UseAuthorization();
+            app.UseAuthorization();      
 
             app.UseEndpoints(endpoints =>
             {

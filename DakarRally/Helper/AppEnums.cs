@@ -1,7 +1,13 @@
 ﻿namespace DakarRally.Helper
 {
-    public static class AppHelper
+    /// <summary>
+    /// Application enumerations class.
+    /// </summary>
+    public static class AppEnums
     {
+        /// <summary>
+        /// Race status.
+        /// </summary>
         public enum RaceState
         {
             Pending,
@@ -9,17 +15,14 @@
             Finished
         }
 
+        /// <summary>
+        /// Vehicle status.
+        /// </summary>
         public enum VehicleStatus
         {
             NoStatus,
             FinishRace,
             BreakDown
-        }
-
-        public enum LogicOperator
-        {
-            AND,
-            OR
         }
     }
 }

@@ -13,11 +13,13 @@ namespace DakarRally.Helper
     /// </summary>
     public class VehicleTypeModelBinder : IModelBinder
     {
+        #region Public methods
+
         /// <summary>
-        /// 
+        /// Binding contrete vehicle class model.
         /// </summary>
-        /// <param name="bindingContext"></param>
-        /// <returns></returns>
+        /// <param name="bindingContext">Model binding context.</param>
+        /// <returns>Binding result.</returns>
         public Task BindModelAsync(ModelBindingContext bindingContext)
         {
             if (bindingContext == null)
@@ -52,11 +54,15 @@ namespace DakarRally.Helper
             return Task.CompletedTask;
         }
 
+        #endregion
+
+        #region Private methods
+
         /// <summary>
-        /// 
+        /// Extracts json string.
         /// </summary>
-        /// <param name="actionContext"></param>
-        /// <returns></returns>
+        /// <param name="actionContext">The action conteht.</param>
+        /// <returns>Extracted json string.</returns>
         private static Task<string> ExtractRequestJson(ActionContext actionContext)
         {
             var content = actionContext.HttpContext.Request.Body;
@@ -96,5 +102,7 @@ namespace DakarRally.Helper
 
             return factory != null ? factory.GetVehicle(jsonResult) : null;
         }
+
+        #endregion
     }
 }
