@@ -2,11 +2,10 @@
 using DakarRally.Interfaces;
 using DakarRally.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
+
 using System.Threading.Tasks;
 
 namespace DakarRally.Controllers
@@ -51,7 +50,7 @@ namespace DakarRally.Controllers
         public async Task<ActionResult<List<Vehicle>>> LeaderboardForAllVehicles()
         {
             var vehicles = await _raceInformationsService.GetLeaderboardForAllVehicles();
-            return vehicles != null ? Ok(vehicles) : NotFound("Leaderboard is not found!");
+            return Ok(vehicles);
         }
 
         /// <summary>
@@ -65,7 +64,7 @@ namespace DakarRally.Controllers
         public async Task<ActionResult<List<Vehicle>>> LeaderboardForVehicle(string type)
         {
             var vehicles = await _raceInformationsService.GetLeaderboardForVehicle(type);
-            return vehicles != null ? Ok(vehicles) : NotFound("Leaderboard is not found!");
+            return vehicles != null ? Ok(vehicles) : NotFound("Vehicles are not found!");
         }
 
         /// <summary>
@@ -78,7 +77,7 @@ namespace DakarRally.Controllers
         public ActionResult<VehicleStatistic> VehicleStatistics(long id)
         {
             var vehicleStatistic = _raceInformationsService.GetVehicleStatistics(id);
-            return vehicleStatistic != null ? Ok(vehicleStatistic) : NotFound("Vehicle statistic is not found!");
+            return Ok(vehicleStatistic);
         }
 
         /// <summary>
@@ -92,22 +91,22 @@ namespace DakarRally.Controllers
         public ActionResult<RaceStatus> RaceStatus([Range(1970, 2050)] int id)
         {
             var raceStatus =_raceInformationsService.GetRaceStatus(id);
-            return raceStatus != null ? Ok(raceStatus) : NotFound("Race is not found!");
+            return Ok(raceStatus);
         }
 
         /// <summary>
         /// Retrives filtered data.
         /// </summary>
-        /// <param name="filterData">Filter data.</param>
+        /// <param name="request">Filter informatiions.</param>
         /// <param name="order">Sort order (asc or desc).</param>
         /// <returns>Filter output model.</returns>
         // GET: api/informations/vehicles/desc
         [HttpPost("vehicles/{order}")]
         [ValidateOrderParameter]
-        public async Task<ActionResult<FilterOutputModel>> FilterVehicles([FromBody] FilterData filterData, string order)
+        public async Task<ActionResult<DesiredVehiclesResponse>> FilterVehicles([FromBody] DesiredVehiclesRequest request, string order)
         {
-            var filterOutput = await _raceInformationsService.FindVehicles(filterData, order);
-            return filterOutput != null ? Ok(filterOutput) : NotFound("Vehicles are not found!");
+            var desiredVehicles = await _raceInformationsService.FindVehicles(request, order);
+            return Ok(desiredVehicles);
         }
 
         #endregion

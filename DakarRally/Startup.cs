@@ -2,12 +2,16 @@ using DakarRally.Interfaces;
 using DakarRally.Models;
 using DakarRally.Services;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using Newtonsoft.Json;
+using System;
 
 namespace DakarRally
 {
@@ -75,6 +79,8 @@ namespace DakarRally
             {
                 endpoints.MapControllers();
             });
+
+            app.UseStatusCodePages();
         }
     }
 }

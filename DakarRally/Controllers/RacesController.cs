@@ -4,7 +4,6 @@ using DakarRally.Interfaces;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
-using Microsoft.Extensions.Logging;
 
 namespace DakarRally.Controllers
 {
@@ -44,17 +43,13 @@ namespace DakarRally.Controllers
         /// </summary>
         /// <param name="year">Race year.</param>
         /// <returns>Race informations.</returns>
-        // POST: api/Races/Race/1970
+        // POST: api/races/race/1970
         [HttpPost("race/{year}")]
         [ValidateActionParameters]
         public async Task<ActionResult<Race>> Race([Range(1970, 2050)] int year)
         {
             var race = new Race(year);
-            if (await _raceService.CreateRace(race) != 0)
-            {    
-                return CreatedAtAction(nameof(Race), new { id = race.Year }, race);
-            }
-            return BadRequest("It is not possible to create race!");
+            return await _raceService.CreateRace(race) != 0 ? CreatedAtAction(nameof(Race), new { id = race.Year }, race) : BadRequest("Race is not created!");
         }
 
         /// <summary>
@@ -62,15 +57,11 @@ namespace DakarRally.Controllers
         /// </summary>
         /// <param name="vehicle">New vehicle.</param>
         /// <returns>Vehicle added to the race.</returns>
-        // POST: api/Races/Vehicle
+        // POST: api/races/vehicle
         [HttpPost("vehicle")]
         public async Task<ActionResult<Vehicle>> Vehicle([ModelBinder(BinderType = typeof(VehicleTypeModelBinder))][FromBody] Vehicle vehicle)
         {
-            if(await _raceService.AddVehicleToRace(vehicle) != 0)
-            {
-                return CreatedAtAction(nameof(Viecle), new { id = vehicle.Id }, vehicle);
-            }
-            return BadRequest("It is not possible to add vehicle to the race!");
+            return await _raceService.AddVehicleToRace(vehicle) != 0 ? CreatedAtAction(nameof(CreateVehicle), new { id = vehicle.Id }, vehicle) : BadRequest("Vehicle is not added to the race!");
         }
 
         /// <summary>
@@ -78,15 +69,11 @@ namespace DakarRally.Controllers
         /// </summary>
         /// <param name="vehicle">Vehicle informations.</param>
         /// <returns>Updated vehicle informations.</returns>
-        // PUT: api/Races/Vehicle/
+        // PUT: api/races/vehicle/
         [HttpPut("vehicle")]
         public async Task<IActionResult> VehicleInfo([ModelBinder(BinderType = typeof(VehicleTypeModelBinder))][FromBody] Vehicle vehicle)
         {
-            if (await _raceService.UpdateVehicleInfo(vehicle) != 0)
-            {
-                return Ok(vehicle);
-            }
-            return BadRequest("It is not possible to update vehicle!");
+            return  await _raceService.UpdateVehicleInfo(vehicle) != 0 ? Ok(vehicle) : BadRequest("Vehicle is not updated!");
         }
 
         /// <summary>
@@ -94,31 +81,25 @@ namespace DakarRally.Controllers
         /// </summary>
         /// <param name="id">Vehicle id.</param>
         /// <returns>Information if vehicle is deleted.</returns>
-        // DELETE: api/Races/Vehicles/5
+        // DELETE: api/races/vehicle/5
         [HttpDelete("vehicle/{id}")]
         public async Task<ActionResult> Vehicle(long id)
         {
-            if (await _raceService.DeleteVehicle(id) != 0)
-            {
-                return Ok("Vehicle is successfully deleted!");
-            }
-            return BadRequest("It is not possible to delete Vehicle. Vehicle with the entered id does not exist or Race is not in pannding state.");
+            return await _raceService.DeleteVehicle(id) != 0 ? Ok("Vehicle is successfully deleted!") : BadRequest("Vehicle is not deleted!");
         }
 
         /// <summary>
         /// Starts the race.
         /// </summary>
         /// <param name="raceId">Race id.</param>
-        // GET: api/Races/StartRace/2020
+        // GET: api/race/2020/start
         [HttpGet("race/{id}/start")]
         [ValidateActionParameters]
         public ActionResult StartRace([Range(1970, 2050)] int id)
         {
             if (_raceService.CheckIfAnyRaceIsRunning()) { return BadRequest("Any race is already running!"); }
-
             _raceService.StartRace(id);
-
-            return Ok("Race successfully finished.");
+            return Ok("Race is successfully finished.");
         }
 
         /// <summary>
@@ -126,7 +107,7 @@ namespace DakarRally.Controllers
         /// </summary>
         /// <param name="id">Race id.</param>
         /// <returns>The race.</returns>
-        // GET: api/Races/Race/id
+        // GET: api/race/id
         [HttpGet("race/{id}")]
         [ValidateActionParameters]
         public async Task<ActionResult<Race>> Race([Range(1970, 2050)] long id)
@@ -140,9 +121,9 @@ namespace DakarRally.Controllers
         /// </summary>
         /// <param name="id">Vehicle id.</param>
         /// <returns>The vehicle.</returns>
-        // GET: api/Races/Viecle/id
+        // GET: api/vehicle/2
         [HttpGet("vehicle/{id}")]
-        public async Task<ActionResult<Vehicle>> Viecle(long id)
+        public async Task<ActionResult<Vehicle>> CreateVehicle(long id)
         {
             var vehicle = await _raceService.FindVehicleById(id);
             return vehicle == null ? NotFound("Vehicle with desired id is not found!") : Ok(vehicle);

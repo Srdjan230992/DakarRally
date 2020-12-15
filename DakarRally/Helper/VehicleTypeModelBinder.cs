@@ -38,7 +38,7 @@ namespace DakarRally.Helper
                     obj = GetVehicle(type.ToString(), json.Result);
                 }
             }
-            catch (JsonReaderException) { throw;  }
+            catch (JsonReaderException) { throw new Exception("Json string is not valid!");  }
             finally
             {
                 if (obj != null)
@@ -100,7 +100,7 @@ namespace DakarRally.Helper
                     break;
             }
 
-            return factory != null ? factory.GetVehicle(jsonResult) : null;
+            return factory != null ? factory.GetVehicle(jsonResult) : throw new NullReferenceException("Vehicle id not found!");
         }
 
         #endregion

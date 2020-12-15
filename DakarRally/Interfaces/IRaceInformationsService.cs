@@ -43,6 +43,6 @@ namespace DakarRally.Interfaces
         /// <param name="filterData">Specified filter data.</param>
         /// <param name="order">Order (asc/desc).</param>
         /// <returns>Filter output data.</returns>
-        public Task<FilterOutputModel> FindVehicles(FilterData filterData, string order);
+        public Task<DesiredVehiclesResponse> FindVehicles(DesiredVehiclesRequest filterData, string order);
     }
 }

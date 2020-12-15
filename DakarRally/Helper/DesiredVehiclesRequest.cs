@@ -3,7 +3,7 @@
     /// <summary>
     /// FilterData class.
     /// </summary>
-    public class FilterData
+    public class DesiredVehiclesRequest
     {
         /// <summary>
         /// Team name.

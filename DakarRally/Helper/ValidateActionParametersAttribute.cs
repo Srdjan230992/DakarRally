@@ -8,8 +8,12 @@ using System.Reflection;
 
 namespace DakarRally.Helper
 {
+    /// <summary>
+    /// ValidateActionParametersAttribute class.
+    /// </summary>
     public class ValidateActionParametersAttribute : ActionFilterAttribute
     {
+        /// <inheritdoc/>
         public override void OnActionExecuting(ActionExecutingContext context)
         {
             var descriptor = context.ActionDescriptor as ControllerActionDescriptor;
@@ -29,6 +33,12 @@ namespace DakarRally.Helper
             base.OnActionExecuting(context);
         }
 
+        /// <summary>
+        /// Evaluates validation attributes.
+        /// </summary>
+        /// <param name="parameter">Discovers the attributes of a parameter and provides access to parameter metadata.</param>
+        /// <param name="argument">Validation informations.</param>
+        /// <param name="modelState">Model state.</param>
         private void EvaluateValidationAttributes(ParameterInfo parameter, object argument, ModelStateDictionary modelState)
         {
             var validationAttributes = parameter.CustomAttributes;
@@ -51,8 +61,12 @@ namespace DakarRally.Helper
         }
     }
 
+    /// <summary>
+    /// ValidateTypeParameterAttribute class.
+    /// </summary>
     public class ValidateTypeParameterAttribute : ActionFilterAttribute
     {
+        /// <inheritdoc/>
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
             var types = new List<string>(3) { "cars", "trucks", "motorcycles" };
@@ -68,8 +82,12 @@ namespace DakarRally.Helper
         }
     }
 
+    /// <summary>
+    /// ValidateOrderParameterAttribute class.
+    /// </summary>
     public class ValidateOrderParameterAttribute : ActionFilterAttribute
     {
+        /// <inheritdoc/>
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
             var types = new List<string>(3) { "asc", "desc" };
