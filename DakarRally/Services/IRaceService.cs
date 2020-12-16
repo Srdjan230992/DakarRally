@@ -1,7 +1,7 @@
 ﻿using DakarRally.Models;
 using System.Threading.Tasks;
 
-namespace DakarRally.Interfaces
+namespace DakarRally.Services
 {
     /// <summary>
     /// Interface for race manipulation.

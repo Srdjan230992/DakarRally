@@ -1,5 +1,4 @@
-﻿using DakarRally.Interfaces;
-using DakarRally.Models;
+﻿using DakarRally.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
@@ -65,7 +64,7 @@ namespace DakarRally.Services
         /// <inheritdoc/>
         public async Task<int> UpdateVehicleInfo(Vehicle vehicle)
         {
-            if (!CheckIfVehicleExists(vehicle.Id)) throw new NullReferenceException($"Vehicle with id: {vehicle.Id} does not exist!");
+            if (!CheckIfVehicleExists(vehicle.Id)) throw new NullReferenceException($"[{nameof(RaceServiceImpl)}] Vehicle with id: {vehicle.Id} does not exist!");
             CheckIfRaceIsInPendingState(vehicle.RaceId);
             ExcludePropertiesFromUpdate(vehicle);
             return await SaveChanges();
@@ -76,7 +75,7 @@ namespace DakarRally.Services
         {
             var vehicle = await _context.Vehicles.FindAsync(id);
 
-            if (vehicle == null) throw new NullReferenceException($"Vehicle with {id} is not found");
+            if (vehicle == null) throw new NullReferenceException($"[{nameof(RaceServiceImpl)}] Vehicle with {id} is not found");
 
             CheckIfRaceIsInPendingState(vehicle.RaceId);
             _context.Vehicles.Remove(vehicle);
@@ -88,7 +87,7 @@ namespace DakarRally.Services
         {
             lock (raceLock)
             {
-                _logger.LogInformation($"Race with {raceId} rtarted.");
+                _logger.LogInformation($"[{nameof(RaceServiceImpl)}] Race with {raceId} rtarted.");
 
                 bool allVehiclesFinished = false;
                 var startTime = DateTime.Now;
@@ -130,7 +129,7 @@ namespace DakarRally.Services
 
                 SetRaceState(raceId, RaceState.Finished);
 
-                _logger.LogInformation($"Race with {raceId} finished.");
+                _logger.LogInformation($"[{nameof(RaceServiceImpl)}] Race with {raceId} finished.");
             }
         }
 
@@ -204,7 +203,7 @@ namespace DakarRally.Services
         /// <returns>true if race is in pending state.</returns>
         private bool CheckIfRaceIsInPendingState(long raceId)
         {
-            return _context.Races.Any(x => x.Year == raceId && x.State == RaceState.Pending) ? true : throw new Exception($"Race with race id: {raceId} needs to be in pending state!");
+            return _context.Races.Any(x => x.Year == raceId && x.State == RaceState.Pending) ? true : throw new Exception($"[{nameof(RaceServiceImpl)}] Race with race id: {raceId} needs to be in pending state!");
         }
 
         /// <summary>
@@ -214,7 +213,7 @@ namespace DakarRally.Services
         /// <returns>true if vehicle is valid.</returns>
         private bool ValidateVehicle(Vehicle vehicle)
         {
-            if (CheckIfVehicleExists(vehicle.Id)) throw new Exception($"Vehicle with id: {vehicle.Id} already exist!");
+            if (CheckIfVehicleExists(vehicle.Id)) throw new Exception($"[{nameof(RaceServiceImpl)}] Vehicle with id: {vehicle.Id} already exist!");
             return (CheckIfRaceExists(vehicle.RaceId) && CheckIfRaceIsInPendingState(vehicle.RaceId)) ? true : false;
         }
 
@@ -226,7 +225,7 @@ namespace DakarRally.Services
         private bool CheckIfRaceExists(long id)
         {
             var race = _context.Races.Any(e => e.Year == id);
-            return race ? true : throw new Exception($"Race with year: {id} does not exist!");
+            return race ? true : throw new Exception($"[{nameof(RaceServiceImpl)}] Race with year: {id} does not exist!");
         }
 
         /// <summary>
@@ -323,7 +322,7 @@ namespace DakarRally.Services
             }
             catch (Exception)
             {
-                throw new Exception("Error occured while saving to the database.");
+                throw new Exception($"[{nameof(RaceServiceImpl)}] Error occured while saving to the database.");
             }
         }
 

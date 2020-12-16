@@ -1,5 +1,4 @@
 ﻿using DakarRally.Helper;
-using DakarRally.Interfaces;
 using DakarRally.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -19,7 +18,6 @@ namespace DakarRally.Services
         #region Fields
 
         private readonly VehicleDbContext _context;
-        private readonly ILogger _logger;
         private readonly List<string> vehicleTypes = new List<string>(5) { "sportcar", "terraincar", "sportmotorbike", "crossmotorbike", "truck" };
         private readonly List<VehicleStatus> vehicleStatuses = new List<VehicleStatus>(3) { VehicleStatus.NoStatus, VehicleStatus.FinishRace, VehicleStatus.BreakDown };
 
@@ -31,9 +29,8 @@ namespace DakarRally.Services
         /// Initializes a new instance of the <see cref="RaceInformationsServiceImpl"/> class.
         /// </summary>
         /// <param name="context">Vehicle database context.</param>
-        public RaceInformationsServiceImpl(ILogger<RaceInformationsServiceImpl> logger, VehicleDbContext context)
+        public RaceInformationsServiceImpl(VehicleDbContext context)
         {
-            _logger = logger;
             _context = context;
         }
 
@@ -61,8 +58,7 @@ namespace DakarRally.Services
                 case "trucks":
                     return await FindVehiclesFromRace(race.Year).OrderBy(x => x.Rank).Where(t => t.Type.ToLower() == "truck")?.ToListAsync();
                 default:
-                    _logger.LogInformation("Invalid race type!");
-                    throw new Exception($"Invalid race type: {type}!");
+                    throw new Exception($"[{nameof(RaceInformationsServiceImpl)}] Invalid race type: {type}!");
             }
         }
 
@@ -98,8 +94,7 @@ namespace DakarRally.Services
             }
             else
             {
-                _logger.LogError($"Race with race id: {raceId} is not found!");
-                throw new NullReferenceException($"Race with race id: {raceId} is not found!");
+                throw new NullReferenceException($"[{nameof(RaceInformationsServiceImpl)}] Race with race id: {raceId} is not found!");
             }
 
             PopulateVehicleStatusToNumberOfVehicles(status);
@@ -154,14 +149,14 @@ namespace DakarRally.Services
         {
             if(vehicles == null)
             {
-                throw new ArgumentNullException("There is no vehicles for desired filtering criteria!");
+                throw new ArgumentNullException($"[{nameof(RaceInformationsServiceImpl)}] There is no vehicles for desired filtering criteria!");
             }
 
             order = order.ToLowerInvariant();
 
             if (string.IsNullOrEmpty(order) && (order != "asc" || order != "desc"))
             {
-                throw new Exception("Invalid order operation!");
+                throw new Exception($"[{nameof(RaceInformationsServiceImpl)}] Invalid order operation!");
             }
             return order == "desc" ? vehicles.OrderByDescending(x => x.TeamName) : vehicles.OrderBy(x => x.TeamName);
         }
@@ -198,7 +193,7 @@ namespace DakarRally.Services
         private IQueryable<Vehicle> FindVehiclesFromRace(int year)
         {
             var vehicles = _context.Vehicles.Where(v => v.RaceId == year);
-            return vehicles != null ? vehicles : throw new ArgumentNullException($"Vehicles with race id: {year} are not found!");
+            return vehicles != null ? vehicles : throw new ArgumentNullException($"[{nameof(RaceInformationsServiceImpl)}] Vehicles with race id: {year} are not found!");
         }
 
         /// <summary>
@@ -208,7 +203,7 @@ namespace DakarRally.Services
         private Race FindRaceInRaunningState()
         {
             var races = _context.Races.Where(r => r.State == RaceState.Running);
-            return races != null ? races.FirstOrDefault() : throw new Exception("Race in running state is not found!");
+            return races != null ? races.FirstOrDefault() : throw new Exception($"[{nameof(RaceInformationsServiceImpl)}] Race in running state is not found!");
         }
 
         #endregion

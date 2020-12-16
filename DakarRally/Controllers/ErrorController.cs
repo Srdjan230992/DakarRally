@@ -51,7 +51,7 @@ namespace DakarRally.Controllers
                         return BadRequest(message);
                 }
             }
-            return BadRequest("Unexpected server error!");
+            return BadRequest("Unexpected server error occured!");
         }
     }
 }

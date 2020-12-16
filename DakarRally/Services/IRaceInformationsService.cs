@@ -3,7 +3,7 @@ using DakarRally.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace DakarRally.Interfaces
+namespace DakarRally.Services
 {
     /// <summary>
     /// Interface that provides race informations.

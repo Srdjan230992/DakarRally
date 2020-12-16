@@ -1,9 +1,9 @@
 ﻿using DakarRally.Models;
 using DakarRally.Helper;
-using DakarRally.Interfaces;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
+using DakarRally.Services;
 
 namespace DakarRally.Controllers
 {
@@ -49,7 +49,7 @@ namespace DakarRally.Controllers
         public async Task<ActionResult<Race>> Race([Range(1970, 2050)] int year)
         {
             var race = new Race(year);
-            return await _raceService.CreateRace(race) != 0 ? CreatedAtAction(nameof(Race), new { id = race.Year }, race) : BadRequest("Race is not created!");
+            return await _raceService.CreateRace(race) != 0 ? CreatedAtAction(nameof(Race), new { id = race.Year }, race) : BadRequest($"Race with {year} is not created!");
         }
 
         /// <summary>
@@ -59,9 +59,9 @@ namespace DakarRally.Controllers
         /// <returns>Vehicle added to the race.</returns>
         // POST: api/races/vehicle
         [HttpPost("vehicle")]
-        public async Task<ActionResult<Vehicle>> Vehicle([ModelBinder(BinderType = typeof(VehicleTypeModelBinder))][FromBody] Vehicle vehicle)
+        public async Task<ActionResult<VehicleResponse>> Vehicle([ModelBinder(BinderType = typeof(VehicleTypeModelBinder))][FromBody] Vehicle vehicle)
         {
-            return await _raceService.AddVehicleToRace(vehicle) != 0 ? CreatedAtAction(nameof(CreateVehicle), new { id = vehicle.Id }, vehicle) : BadRequest("Vehicle is not added to the race!");
+            return await _raceService.AddVehicleToRace(vehicle) != 0 ? CreatedAtAction(nameof(CreateResponse), new { id = vehicle.Id }, vehicle) : BadRequest($"Vehicle with {vehicle.Id} is not added to the race!");
         }
 
         /// <summary>
@@ -73,7 +73,7 @@ namespace DakarRally.Controllers
         [HttpPut("vehicle")]
         public async Task<IActionResult> VehicleInfo([ModelBinder(BinderType = typeof(VehicleTypeModelBinder))][FromBody] Vehicle vehicle)
         {
-            return  await _raceService.UpdateVehicleInfo(vehicle) != 0 ? Ok(vehicle) : BadRequest("Vehicle is not updated!");
+            return  await _raceService.UpdateVehicleInfo(vehicle) != 0 ? Ok(new VehicleResponse(vehicle.TeamName, vehicle.VehicleModel, vehicle.VehicleManufaturingDate)) : BadRequest("Vehicle is not updated!");
         }
 
         /// <summary>
@@ -85,7 +85,7 @@ namespace DakarRally.Controllers
         [HttpDelete("vehicle/{id}")]
         public async Task<ActionResult> Vehicle(long id)
         {
-            return await _raceService.DeleteVehicle(id) != 0 ? Ok("Vehicle is successfully deleted!") : BadRequest("Vehicle is not deleted!");
+            return await _raceService.DeleteVehicle(id) != 0 ? Ok("Vehicle is successfully deleted!") : BadRequest($"Vehicle with {id} is not deleted!");
         }
 
         /// <summary>
@@ -99,7 +99,7 @@ namespace DakarRally.Controllers
         {
             if (_raceService.CheckIfAnyRaceIsRunning()) { return BadRequest("Any race is already running!"); }
             _raceService.StartRace(id);
-            return Ok("Race is successfully finished.");
+            return Ok($"Race with id: {id} is successfully finished.");
         }
 
         /// <summary>
@@ -113,7 +113,7 @@ namespace DakarRally.Controllers
         public async Task<ActionResult<Race>> Race([Range(1970, 2050)] long id)
         {
             var race = await _raceService.FindRaceById(id);
-            return race == null ? NotFound("Race with desired id is not found!") : Ok(race);
+            return race == null ? NotFound($"Race with id: {id} is not found!") : Ok(race);
         }
 
         /// <summary>
@@ -123,10 +123,10 @@ namespace DakarRally.Controllers
         /// <returns>The vehicle.</returns>
         // GET: api/vehicle/2
         [HttpGet("vehicle/{id}")]
-        public async Task<ActionResult<Vehicle>> CreateVehicle(long id)
+        public async Task<ActionResult<VehicleResponse>> CreateResponse(long id)
         {
             var vehicle = await _raceService.FindVehicleById(id);
-            return vehicle == null ? NotFound("Vehicle with desired id is not found!") : Ok(vehicle);
+            return vehicle == null ? NotFound($"Vehicle with id: {id} is not found!") : Ok(new VehicleResponse(vehicle.TeamName, vehicle.VehicleModel, vehicle.VehicleManufaturingDate));
         }
 
         // GET: api/Races/PopulateInitData
