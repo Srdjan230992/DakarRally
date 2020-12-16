@@ -161,14 +161,7 @@ namespace DakarRally.Services
         /// <param name="vehicle">Vehicle.</param>
         private void IncreaseVehicleDistance(Vehicle vehicle)
         {
-            if (vehicle.PassedDistance + vehicle.VehicleSpeed > startFinishDistance)
-            {
-                vehicle.PassedDistance += startFinishDistance - vehicle.PassedDistance;
-            }
-            else
-            {
-                vehicle.PassedDistance += vehicle.VehicleSpeed;
-            }
+            vehicle.PassedDistance += (vehicle.PassedDistance + vehicle.VehicleSpeed > startFinishDistance) ? (startFinishDistance - vehicle.PassedDistance) : vehicle.VehicleSpeed;
         }
 
         /// <summary>
