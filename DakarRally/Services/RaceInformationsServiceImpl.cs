@@ -1,10 +1,9 @@
-﻿using DakarRally.Helper;
+﻿using DakarRally.Exceptions;
+using DakarRally.Helper;
 using DakarRally.Models;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using static DakarRally.Helper.AppEnums;
 
 namespace DakarRally.Services
@@ -38,24 +37,24 @@ namespace DakarRally.Services
         #region Public methods
 
         /// <inheritdoc/>
-        public async Task<List<Vehicle>> GetLeaderboardForAllVehicles()
+        public List<Vehicle> GetLeaderboardForAllVehicles()
         {
             var race = FindRaceInRaunningState();
-            return await FindVehiclesFromRace(race.Year)?.OrderBy(x => x.Rank).ToListAsync();
+            return FindVehiclesFromRace(race.Year).OrderBy(x => x.Rank).ToList();
         }
 
         /// <inheritdoc/>
-        public async Task<List<Vehicle>> GetLeaderboardForVehicle(string type)
+        public List<Vehicle> GetLeaderboardForVehicle(string type)
         {
             var race = FindRaceInRaunningState();
             switch (type.ToLower())
             {
                 case "cars":
-                    return await FindVehiclesFromRace(race.Year).OrderBy(x => x.Rank).Where(t => t.Type.ToLower() == "sportcar" || t.Type.ToLower() == "terraincar")?.ToListAsync();
+                    return FindVehiclesFromRace(race.Year).OrderBy(x => x.Rank).Where(t => t.Type.ToLower() == "sportcar" || t.Type.ToLower() == "terraincar")?.ToList();
                 case "motorcycles":
-                    return await FindVehiclesFromRace(race.Year).OrderBy(x => x.Rank).Where(t => t.Type.ToLower() == "sportmotorbike" || t.Type.ToLower() == "crossmotorbike")?.ToListAsync();
+                    return FindVehiclesFromRace(race.Year).OrderBy(x => x.Rank).Where(t => t.Type.ToLower() == "sportmotorbike" || t.Type.ToLower() == "crossmotorbike")?.ToList();
                 case "trucks":
-                    return await FindVehiclesFromRace(race.Year).OrderBy(x => x.Rank).Where(t => t.Type.ToLower() == "truck")?.ToListAsync();
+                    return FindVehiclesFromRace(race.Year).OrderBy(x => x.Rank).Where(t => t.Type.ToLower() == "truck")?.ToList();
                 default:
                     throw new Exception($"[{nameof(RaceInformationsServiceImpl)}] Invalid race type: {type}!");
             }
@@ -65,16 +64,16 @@ namespace DakarRally.Services
         public VehicleStatistic GetVehicleStatistics(long vehicleId)
         {
             var vehicle = _context.Vehicles.Where(v => v.Id == vehicleId)?.FirstOrDefault();
-            return vehicle != null ? new VehicleStatistic(vehicle.PassedDistance, vehicle.IsHeavyMalfunctionOccured, vehicle.LightMalfunctionCount) : throw new NullReferenceException($"Vehicle with id: {vehicleId} does not exist!");
+            return vehicle != null ? new VehicleStatistic(vehicle.PassedDistance, vehicle.IsHeavyMalfunctionOccured, vehicle.LightMalfunctionCount) : throw new VehiclesNotFoundException($"Vehicle with id: {vehicleId} does not exist!");
         }
 
         /// <inheritdoc/>
-        public async Task<DesiredVehiclesResponse> FindVehicles(DesiredVehiclesRequest filterData, string order)
+        public DesiredVehiclesResponse FindVehicles(DesiredVehiclesRequest filterData, string order)
         {
-            var vehiclesByTeamName = await SortData(order, _context.Vehicles.Where(x => x.TeamName == filterData.Team))?.ToListAsync();
-            var vehiclesByModel = await SortData(order, FilterData(filterData.Model.LogicOperation, vehiclesByTeamName, _context.Vehicles.Where(x => x.VehicleModel == filterData.Model.Field)).AsQueryable())?.ToListAsync();
-            var vehiclesByStatus = await SortData(order, FilterData(filterData.Status.LogicOperation, vehiclesByModel, _context.Vehicles.Where(x => x.VehicleStatus.ToString() == filterData.Status.Field)).AsQueryable())?.ToListAsync();
-            var vehiclesByDistance = await SortData(order, FilterData(filterData.Distance.LogicOperation, vehiclesByStatus, _context.Vehicles.Where(x => x.PassedDistance.ToString() == filterData.Distance.Field)).AsQueryable())?.ToListAsync();
+            var vehiclesByTeamName = SortData(order, _context.Vehicles.Where(x => x.TeamName == filterData.Team))?.ToList();
+            var vehiclesByModel = SortData(order, FilterData(filterData.Model.LogicOperation, vehiclesByTeamName, _context.Vehicles.Where(x => x.VehicleModel == filterData.Model.Field)).AsQueryable())?.ToList();
+            var vehiclesByStatus = SortData(order, FilterData(filterData.Status.LogicOperation, vehiclesByModel, _context.Vehicles.Where(x => x.VehicleStatus.ToString() == filterData.Status.Field)).AsQueryable())?.ToList();
+            var vehiclesByDistance = SortData(order, FilterData(filterData.Distance.LogicOperation, vehiclesByStatus, _context.Vehicles.Where(x => x.PassedDistance.ToString() == filterData.Distance.Field)).AsQueryable())?.ToList();
 
             var filterOutputModel = new DesiredVehiclesResponse();
             filterOutputModel.Count = vehiclesByDistance?.Count();
@@ -93,7 +92,7 @@ namespace DakarRally.Services
             }
             else
             {
-                throw new NullReferenceException($"[{nameof(RaceInformationsServiceImpl)}] Race with race id: {raceId} is not found!");
+                throw new RacesNotFoundException($"[{nameof(RaceInformationsServiceImpl)}] Race with race id: {raceId} is not found!");
             }
 
             PopulateVehicleStatusToNumberOfVehicles(status);
@@ -148,7 +147,7 @@ namespace DakarRally.Services
         {
             if(vehicles == null)
             {
-                throw new ArgumentNullException($"[{nameof(RaceInformationsServiceImpl)}] There is no vehicles for desired filtering criteria!");
+                throw new VehiclesNotFoundException($"[{nameof(RaceInformationsServiceImpl)}] There is no vehicles for desired filtering criteria!");
             }
 
             order = order.ToLowerInvariant();
@@ -192,7 +191,7 @@ namespace DakarRally.Services
         private IQueryable<Vehicle> FindVehiclesFromRace(int year)
         {
             var vehicles = _context.Vehicles.Where(v => v.RaceId == year);
-            return vehicles != null ? vehicles : throw new ArgumentNullException($"[{nameof(RaceInformationsServiceImpl)}] Vehicles with race id: {year} are not found!");
+            return vehicles.Count() != 0 ? vehicles : throw new VehiclesNotFoundException($"[{nameof(RaceInformationsServiceImpl)}] Vehicles with race id: {year} are not found!");
         }
 
         /// <summary>
@@ -201,8 +200,8 @@ namespace DakarRally.Services
         /// <returns>The race.</returns>
         private Race FindRaceInRaunningState()
         {
-            var races = _context.Races.Where(r => r.State == RaceState.Running);
-            return races != null ? races.FirstOrDefault() : throw new Exception($"[{nameof(RaceInformationsServiceImpl)}] Race in running state is not found!");
+            var races = _context.Races.Where(r => r.State == RaceState.Running).FirstOrDefault();
+            return races != null ? races : throw new Exception($"[{nameof(RaceInformationsServiceImpl)}] Race in running state is not found!");
         }
 
         #endregion

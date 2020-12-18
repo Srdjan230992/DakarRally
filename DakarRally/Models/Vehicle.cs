@@ -99,7 +99,7 @@ namespace DakarRally.Models
         /// <summary>
         /// Heavy malfunction probability
         /// </summary>
-        [NotMapped]
+       // [NotMapped]
         public double HeavyMalfunctionProbability { get; set; } = 0;
 
         /// <summary>

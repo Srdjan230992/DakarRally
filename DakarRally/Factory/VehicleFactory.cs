@@ -1,6 +1,6 @@
 ﻿using DakarRally.Models;
 
-namespace DakarRally.Helper
+namespace DakarRally.Factory
 {
     /// <summary>
     /// VehicleFactory class.

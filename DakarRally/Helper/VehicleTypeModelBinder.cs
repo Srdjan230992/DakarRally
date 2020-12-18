@@ -1,4 +1,6 @@
-﻿using DakarRally.Models;
+﻿using DakarRally.Exceptions;
+using DakarRally.Factory;
+using DakarRally.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Newtonsoft.Json;
@@ -100,7 +102,7 @@ namespace DakarRally.Helper
                     break;
             }
 
-            return factory != null ? factory.GetVehicle(jsonResult) : throw new NullReferenceException("Vehicle id not found!");
+            return factory != null ? factory.GetVehicle(jsonResult) : throw new VehiclesNotFoundException("Vehicle id not found!");
         }
 
         #endregion

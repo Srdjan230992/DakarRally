@@ -6,14 +6,12 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-using System.Threading.Tasks;
-
 namespace DakarRally.Controllers
 {
     /// <summary>
     /// The race informations controller.
     /// </summary>
-    [Route("api/informations")]
+    [Route("api/")]
     [ApiController]
     public class RaceInformationsController : ControllerBase
     {
@@ -45,12 +43,11 @@ namespace DakarRally.Controllers
         /// Retrives leaderboard informations for all vehicles.
         /// </summary>
         /// <returns>List of vehicles with leaderboard informations.</returns>
-        // GET: api/informations/vehicles/leaderboard
-        [HttpGet("vehicles/leaderboard")]
-        public async Task<ActionResult<List<Vehicle>>> LeaderboardForAllVehicles()
+        // GET: api/leaderboard
+        [HttpGet("leaderboard")]
+        public ActionResult<List<Vehicle>> LeaderboardForAllVehicles()
         {
-            var vehicles = await _raceInformationsService.GetLeaderboardForAllVehicles();
-            return Ok(vehicles);
+            return Ok(_raceInformationsService.GetLeaderboardForAllVehicles());
         }
 
         /// <summary>
@@ -58,13 +55,12 @@ namespace DakarRally.Controllers
         /// </summary>
         /// <param name="type">Vehicle type.</param>
         /// <returns>Vehicle with leaderboard informations.</returns>
-        // GET: api/informations/vehicles/cars/leaderboard
-        [HttpGet("vehicles/{type}/leaderboard")]
+        // GET: api/?type=cars
+        [HttpGet]
         [ValidateTypeParameter]
-        public async Task<ActionResult<List<Vehicle>>> LeaderboardForVehicle(string type)
+        public ActionResult<List<Vehicle>> LeaderboardForVehicle([FromQuery(Name = "type")] string type)
         {
-            var vehicles = await _raceInformationsService.GetLeaderboardForVehicle(type);
-            return vehicles != null ? Ok(vehicles) : NotFound("Vehicles are not found!");
+            return Ok(_raceInformationsService.GetLeaderboardForVehicle(type));
         }
 
         /// <summary>
@@ -72,12 +68,11 @@ namespace DakarRally.Controllers
         /// </summary>
         /// <param name="id">Vehicle id.</param>
         /// <returns>Vehicle statistics.</returns>
-        // GET: api/informations/vehicles/2/statistics
+        // GET: api/vehicles/2/statistics
         [HttpGet("vehicles/{id}/statistics")]
         public ActionResult<VehicleStatistic> VehicleStatistics(long id)
         {
-            var vehicleStatistic = _raceInformationsService.GetVehicleStatistics(id);
-            return Ok(vehicleStatistic);
+            return Ok(_raceInformationsService.GetVehicleStatistics(id));
         }
 
         /// <summary>
@@ -85,13 +80,12 @@ namespace DakarRally.Controllers
         /// </summary>
         /// <param name="id">Race id (year).</param>
         /// <returns>Race status.</returns>
-        // GET: api/informations/races/2020/status
+        // GET: api/races/2020/status
         [HttpGet("races/{id}/status")]
         [ValidateActionParameters]
         public ActionResult<RaceStatus> RaceStatus([Range(1970, 2050)] int id)
         {
-            var raceStatus =_raceInformationsService.GetRaceStatus(id);
-            return Ok(raceStatus);
+            return Ok(_raceInformationsService.GetRaceStatus(id));
         }
 
         /// <summary>
@@ -99,14 +93,13 @@ namespace DakarRally.Controllers
         /// </summary>
         /// <param name="request">Filter informatiions.</param>
         /// <param name="order">Sort order (asc or desc).</param>
-        /// <returns>Filter output model.</returns>
-        // GET: api/informations/vehicles/desc
-        [HttpPost("vehicles/{order}")]
+        /// <returns>Desired vehicles response.</returns>
+        // GET: api/vehicles?order=desc
+        [HttpPost("vehicles")]
         [ValidateOrderParameter]
-        public async Task<ActionResult<DesiredVehiclesResponse>> FilterVehicles([FromBody] DesiredVehiclesRequest request, string order)
+        public ActionResult<DesiredVehiclesResponse> FilterVehicles([FromBody] DesiredVehiclesRequest request, [FromQuery(Name = "order")] string order)
         {
-            var desiredVehicles = await _raceInformationsService.FindVehicles(request, order);
-            return Ok(desiredVehicles);
+            return Ok(_raceInformationsService.FindVehicles(request, order));
         }
 
         #endregion

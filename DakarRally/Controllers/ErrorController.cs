@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Diagnostics;
+﻿using DakarRally.Exceptions;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -42,16 +43,16 @@ namespace DakarRally.Controllers
                 _logger.LogError(message);
                 switch (exception)
                 {
-                    case ArgumentNullException:
-                    case NullReferenceException:
+                    case VehiclesNotFoundException:
+                    case RacesNotFoundException:
                         return NotFound(message);
-                    case Exception:
+                    case ArgumentNullException:
                         return BadRequest(message);
                     default:
                         return BadRequest(message);
                 }
             }
-            return BadRequest("Unexpected server error occured!");
+            return BadRequest($"[{nameof(ErrorController)}] Unexpected server error occured. Log message is not found.");
         }
     }
 }

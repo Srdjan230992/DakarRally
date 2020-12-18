@@ -1,7 +1,6 @@
 ﻿using DakarRally.Helper;
 using DakarRally.Models;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace DakarRally.Services
 {
@@ -14,14 +13,14 @@ namespace DakarRally.Services
         /// Retrives leaderboard data for all vehicles.
         /// </summary>
         /// <returns>List of vehicles.</returns>
-        public Task<List<Vehicle>> GetLeaderboardForAllVehicles();
+        public List<Vehicle> GetLeaderboardForAllVehicles();
 
         /// <summary>
         /// Retrives leaderboard data for vehicles with specified type.
         /// </summary>
         /// <param name="type">Vehicle type.</param>
         /// <returns>List of vehicles.</returns>
-        public Task<List<Vehicle>> GetLeaderboardForVehicle(string type);
+        public List<Vehicle> GetLeaderboardForVehicle(string type);
 
         /// <summary>
         /// Retrives vehicle statistics data.
@@ -43,6 +42,6 @@ namespace DakarRally.Services
         /// <param name="filterData">Specified filter data.</param>
         /// <param name="order">Order (asc/desc).</param>
         /// <returns>Filter output data.</returns>
-        public Task<DesiredVehiclesResponse> FindVehicles(DesiredVehiclesRequest filterData, string order);
+        public DesiredVehiclesResponse FindVehicles(DesiredVehiclesRequest filterData, string order);
     }
 }

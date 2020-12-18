@@ -1,8 +1,8 @@
-﻿using DakarRally.Models;
+﻿using DakarRally.Exceptions;
+using DakarRally.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -43,43 +43,41 @@ namespace DakarRally.Services
         #region Public methods
 
         /// <inheritdoc/>
-        public async Task<int> CreateRace(Race race)
+        public async Task CreateRace(Race race)
         {
             CheckIfRaceExists(race.Year);
             _context.Races.Add(race);
-            return await SaveChanges();
+            await SaveChanges();
         }
 
         /// <inheritdoc/>
-        public async Task<int> AddVehicleToRace(Vehicle vehicle)
+        public async Task AddVehicleToRace(Vehicle vehicle)
         {
             if (ValidateVehicle(vehicle))
             {
                 _context.Vehicles.Add(vehicle);
-                return await SaveChanges();
+                await SaveChanges();
             }
-            return 0;
         }
 
         /// <inheritdoc/>
-        public async Task<int> UpdateVehicleInfo(Vehicle vehicle)
+        public async Task UpdateVehicleInfo(Vehicle vehicle)
         {
-            if (!CheckIfVehicleExists(vehicle.Id)) throw new NullReferenceException($"[{nameof(RaceServiceImpl)}] Vehicle with id: {vehicle.Id} does not exist!");
+            if (!CheckIfVehicleExists(vehicle.Id)) throw new VehiclesNotFoundException($"[{nameof(RaceServiceImpl)}] Vehicle with id: {vehicle.Id} does not exist!");
             CheckIfRaceIsInPendingState(vehicle.RaceId);
-            ExcludePropertiesFromUpdate(vehicle);
-            return await SaveChanges();
+            await SaveChanges();
         }
 
         /// <inheritdoc/>
-        public async Task<int> DeleteVehicle(long id)
+        public async Task DeleteVehicle(long id)
         {
             var vehicle = await _context.Vehicles.FindAsync(id);
 
-            if (vehicle == null) throw new NullReferenceException($"[{nameof(RaceServiceImpl)}] Vehicle with {id} is not found");
+            if (vehicle == null) { throw new NullReferenceException($"[{nameof(RaceServiceImpl)}] Vehicle with {id} is not found"); }
 
             CheckIfRaceIsInPendingState(vehicle.RaceId);
             _context.Vehicles.Remove(vehicle);
-            return await SaveChanges();
+            await SaveChanges();
         }
 
         /// <inheritdoc/>
@@ -89,10 +87,14 @@ namespace DakarRally.Services
             {
                 _logger.LogInformation($"[{nameof(RaceServiceImpl)}] Race with {raceId} rtarted.");
 
+                if(CheckIfAnyRaceIsRunning()) throw new Exception($"[{nameof(RaceServiceImpl)}] Any race is already running!");
+
                 bool allVehiclesFinished = false;
                 var startTime = DateTime.Now;
                 int rank = 0;
                 var vehicles = FindVehiclesWithRaceId(raceId);
+
+                if(vehicles.Count() == 0) throw new RacesNotFoundException($"[{nameof(RaceServiceImpl)}] Race with {raceId} is not found");
 
                 SetRaceState(raceId, RaceState.Running);
                 do
@@ -319,88 +321,6 @@ namespace DakarRally.Services
             }
         }
 
-        /// <summary>
-        /// Excludes from update properties which will be dynamicaly changed.
-        /// </summary>
-        /// <param name="vehicle">Vehicle for update.</param>
-        private void ExcludePropertiesFromUpdate(Vehicle vehicle)
-        {
-            _context.Entry(vehicle).State = EntityState.Modified;
-            _context.Entry(vehicle).Property(x => x.HeavyMalfunctionProbability).IsModified = false;
-            _context.Entry(vehicle).Property(x => x.IsHeavyMalfunctionOccured).IsModified = false;
-            _context.Entry(vehicle).Property(x => x.IsLightMalfunctionOccured).IsModified = false;
-            _context.Entry(vehicle).Property(x => x.LightMalfunctionDelay).IsModified = false;
-            _context.Entry(vehicle).Property(x => x.LightMalfunctionProbability).IsModified = false;
-            _context.Entry(vehicle).Property(x => x.PassedDistance).IsModified = false;
-            _context.Entry(vehicle).Property(x => x.Type).IsModified = false;
-            _context.Entry(vehicle).Property(x => x.VehicleFinishedRace).IsModified = false;
-            _context.Entry(vehicle).Property(x => x.VehicleManufaturingDate).IsModified = false;
-            _context.Entry(vehicle).Property(x => x.VehicleSpeed).IsModified = false;
-        }
-
         #endregion
-
-        public void PopulateInitData()
-        {
-            Race race = new Race(2020);
-            race.Id = 1;
-            _context.Races.Add(race);
-
-            List<Vehicle> vehicles = new List<Vehicle>(25);
-            int j = 1;
-            for (int i = 0; i < 10; i++)
-            {
-                var sc = new SportCar();
-                sc.Id = j++;
-                sc.RaceId = 2020;
-                sc.TeamName = "Team" + i;
-                sc.Type = "sportcar";
-                sc.VehicleModel = "model1";
-                vehicles.Add(sc);
-            }
-            for (int i = 0; i < 5; i++)
-            {
-                var sc = new CrossMotorbike();
-                sc.Id = j++;
-                sc.RaceId = 2020;
-                sc.TeamName = "Team" + i;
-                sc.Type = "crossmotorbike";
-                sc.VehicleModel = "model1";
-                vehicles.Add(sc);
-            }
-            for (int i = 0; i < 5; i++)
-            {
-                var sc = new SportMotorbike();
-                sc.Id = j++;
-                sc.RaceId = 2020;
-                sc.TeamName = "Team" + i;
-                sc.Type = "sportmotorbike";
-                sc.VehicleModel = "model1";
-                sc.VehicleStatus = VehicleStatus.NoStatus;
-                vehicles.Add(sc);
-            }
-            for (int i = 0; i < 5; i++)
-            {
-                var sc = new TerrainCar();
-                sc.Id = j++;
-                sc.RaceId = 2020;
-                sc.TeamName = "Team" + i;
-                sc.Type = "terraincar";
-                sc.VehicleModel = "model1";
-                vehicles.Add(sc);
-            }
-            for (int i = 0; i < 5; i++)
-            {
-                var sc = new Truck();
-                sc.Id = j++;
-                sc.RaceId = 2020;
-                sc.TeamName = "Team" + i;
-                sc.Type = "truck";
-                sc.VehicleModel = "model1";
-                vehicles.Add(sc);
-            }
-            _context.Vehicles.AddRange(vehicles);
-            _context.SaveChangesAsync();
-        }
     }
 }

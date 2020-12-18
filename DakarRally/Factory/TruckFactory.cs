@@ -1,16 +1,16 @@
 ﻿using DakarRally.Models;
 
-namespace DakarRally.Helper
+namespace DakarRally.Factory
 {
     /// <summary>
-    /// SportMotorbikeFactory class.
+    /// TruckFactory class.
     /// </summary>
-    public class SportMotorbikeFactory : VehicleFactory
+    public class TruckFactory : VehicleFactory
     {
         /// <inheritdoc/>
         public override Vehicle GetVehicle(string jsonResult)
         {
-            return DeserializeObject<SportMotorbike>(jsonResult);
+            return DeserializeObject<Truck>(jsonResult);
         }
     }
 }
