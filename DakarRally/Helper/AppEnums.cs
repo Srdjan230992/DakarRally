@@ -10,9 +10,9 @@
         /// </summary>
         public enum RaceState
         {
-            Pending,
-            Running,
-            Finished
+            PENDING,
+            RUNNING,
+            FINISHED
         }
 
         /// <summary>
@@ -20,9 +20,40 @@
         /// </summary>
         public enum VehicleStatus
         {
-            NoStatus,
-            FinishRace,
-            BreakDown
+            NOSTATUS,
+            FINISHRACE,
+            BREAKDOWN
+        }
+
+        /// <summary>
+        /// Vehicle type.
+        /// </summary>
+        public enum VehicleType
+        {
+            SPORTCAR,
+            TERRAINCAR,
+            SPORTMOTORBIKE,
+            CROSSMOTORBIKE,
+            TRUCK
+        }
+
+        /// <summary>
+        /// Vehicles type.
+        /// </summary>
+        public enum VehiclesType
+        {
+            CARS,
+            TRUCKS,
+            MOTORCYCLES
+        }
+
+        /// <summary>
+        /// Order type.
+        /// </summary>
+        public enum OrderType
+        {
+            ASC,
+            DESC
         }
     }
 }

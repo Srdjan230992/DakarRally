@@ -15,7 +15,7 @@ namespace DakarRally.Models
         public Race(int year)
         {
             Year = year;
-            State = RaceState.Pending;
+            State = RaceState.PENDING;
         }
 
         /// <summary>

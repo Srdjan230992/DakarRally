@@ -51,7 +51,7 @@ namespace DakarRally
                     sc.TeamName = "Team" + i;
                     sc.Type = "sportmotorbike";
                     sc.VehicleModel = "model1";
-                    sc.VehicleStatus = VehicleStatus.NoStatus;
+                    sc.VehicleStatus = VehicleStatus.NOSTATUS;
                     vehicles.Add(sc);
                 }
                 for (int i = 0; i < 5; i++)

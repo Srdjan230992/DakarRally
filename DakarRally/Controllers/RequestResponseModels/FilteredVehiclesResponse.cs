@@ -6,7 +6,7 @@ namespace DakarRally.Helper
     /// <summary>
     /// FilterOutputModel class.
     /// </summary>
-    public class DesiredVehiclesResponse
+    public class FilteredVehiclesResponse
     {
         /// <summary>
         /// Number of filter results.

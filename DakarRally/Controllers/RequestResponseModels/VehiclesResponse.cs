@@ -5,7 +5,7 @@ namespace DakarRally.Helper
     /// <summary>
     /// VehicleResponse class;
     /// </summary>
-    public class VehicleResponse
+    public class VehiclesResponse
     {
         #region Fields
 
@@ -18,12 +18,12 @@ namespace DakarRally.Helper
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="VehicleResponse"/> class.
+        /// Initializes a new instance of the <see cref="VehiclesResponse"/> class.
         /// </summary>
         /// <param name="teamName">Team name.</param>
         /// <param name="vehicleModel">Vehicle model.</param>
         /// <param name="vehicleManufacturingDate">Vehicle manufacturing date.</param>
-        public VehicleResponse(string teamName, string vehicleModel, DateTime vehicleManufacturingDate)
+        public VehiclesResponse(string teamName, string vehicleModel, DateTime vehicleManufacturingDate)
         {
             _teamName = teamName;
             _vehicleModel = vehicleModel;

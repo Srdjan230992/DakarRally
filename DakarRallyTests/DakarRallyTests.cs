@@ -82,13 +82,14 @@ namespace DakarRallyTests
 
                 // Check race status before race is started
                 var rs = informationsService.GetRaceStatus(raceId);
-                Assert.AreEqual(RaceState.Pending.ToString(), rs.Status);
+                Assert.AreEqual(RaceState.PENDING.ToString(), rs.Status);
                 foreach(var status in rs.VehicleStatusToNumberOfVehicles.Keys)
                 {
                     Assert.AreEqual(rs.VehicleStatusToNumberOfVehicles[status], context.Vehicles.Where(x => x.VehicleStatus.ToString() == status).Count());
                 }
                 foreach (var type in rs.VehicleTypeToNumberOfVehicles.Keys)
                 {
+                    Vehicle veh = context.Vehicles.Where(x => x.Type == type).FirstOrDefault();
                     Assert.AreEqual(rs.VehicleTypeToNumberOfVehicles[type], context.Vehicles.Where(x => x.Type == type).Count());
                 }
             }
@@ -115,15 +116,15 @@ namespace DakarRallyTests
                 foreach (var vehicle in heavyMalfunction100)
                 {
                     Assert.AreEqual(true, vehicle.IsHeavyMalfunctionOccured);
-                    Assert.AreEqual(VehicleStatus.BreakDown, vehicle.VehicleStatus);
+                    Assert.AreEqual(VehicleStatus.BREAKDOWN, vehicle.VehicleStatus);
                 }
 
-                // Verify - all wehicles with heavy malfunction
+                // Verify - all vehicles with heavy malfunction
                 var allWitHeavyMalfunction = context.Vehicles.Where(x => x.IsHeavyMalfunctionOccured == true && x.RaceId == raceID);
                 Assert.GreaterOrEqual(allWitHeavyMalfunction.Count(), 10);
                 foreach (var vehicle in allWitHeavyMalfunction)
                 {
-                    Assert.AreEqual(VehicleStatus.BreakDown, vehicle.VehicleStatus);
+                    Assert.AreEqual(VehicleStatus.BREAKDOWN, vehicle.VehicleStatus);
                 }
 
                 // Verify - heavy malfunction occured 0%
@@ -132,15 +133,15 @@ namespace DakarRallyTests
                 foreach (var vehicle in heavyMalfunction0)
                 {
                     Assert.AreEqual(false, vehicle.IsHeavyMalfunctionOccured);
-                    Assert.AreEqual(VehicleStatus.FinishRace, vehicle.VehicleStatus);
+                    Assert.AreEqual(VehicleStatus.FINISHRACE, vehicle.VehicleStatus);
                 }
 
-                // Verify - all wehicles without heavy malfunction
+                // Verify - all vehicles without heavy malfunction
                 var allWithoutHeavyMalfunction = context.Vehicles.Where(x => x.IsHeavyMalfunctionOccured == false && x.RaceId == raceID);
                 Assert.GreaterOrEqual(allWithoutHeavyMalfunction.Count(), 5);
                 foreach(var vehicle in allWithoutHeavyMalfunction)
                 {
-                    Assert.AreEqual(VehicleStatus.FinishRace, vehicle.VehicleStatus);
+                    Assert.AreEqual(VehicleStatus.FINISHRACE, vehicle.VehicleStatus);
                 }
             }
         }
@@ -158,9 +159,9 @@ namespace DakarRallyTests
 
             using (var context = new VehicleDbContext(options))
             {
-                SpinWait.SpinUntil(() => { Thread.Sleep(1000); return context.Races.Where(x => x.Year == raceId).FirstOrDefault().State == RaceState.Running; }, 5000);
+                SpinWait.SpinUntil(() => { Thread.Sleep(1000); return context.Races.Where(x => x.Year == raceId).FirstOrDefault().State == RaceState.RUNNING; }, 5000);
 
-                Assert.AreEqual(RaceState.Running, context.Races.Where(x => x.Year == raceId).FirstOrDefault().State);
+                Assert.AreEqual(RaceState.RUNNING, context.Races.Where(x => x.Year == raceId).FirstOrDefault().State);
 
                 informationsService = new RaceInformationsServiceImpl(context);
                 var leaderboardCars = informationsService.GetLeaderboardForVehicle("cars");
@@ -169,7 +170,7 @@ namespace DakarRallyTests
                 Assert.IsNotNull(leaderboardAll);
 
                 syncRace.WaitOne();
-                SpinWait.SpinUntil(() => { return context.Races.Where(x => x.Year == raceId).FirstOrDefault().State == RaceState.Finished; }, 5000);
+                SpinWait.SpinUntil(() => { return context.Races.Where(x => x.Year == raceId).FirstOrDefault().State == RaceState.FINISHED; }, 5000);
             }
         }
         private void StartRace(int raceId)
@@ -191,12 +192,12 @@ namespace DakarRallyTests
         {      
             sc.RaceId = raceId;
             sc.TeamName = "Team300";
-            sc.Type = "sportcar";
+            sc.Type = "SPORTCAR";
             sc.VehicleModel = "model1";
-            await raceService.AddVehicleToRace(sc);
+            await raceService.AddVehicleToRace(sc, raceId);
             var v = context.Vehicles.Where(x => x.RaceId == raceId).FirstOrDefault();
             Assert.AreEqual(raceId, v.RaceId);
-            Assert.AreEqual("sportcar", v.Type);
+            Assert.AreEqual("SPORTCAR", v.Type);
             Assert.AreEqual("model1", v.VehicleModel);
             context.SaveChanges();
         }
@@ -205,7 +206,7 @@ namespace DakarRallyTests
         {
             sc.Type = "updatedType";
             sc.VehicleModel = "updatedModel";
-            await raceService.UpdateVehicleInfo(sc);
+            await raceService.UpdateVehicleInfo(sc, sc.Id);
             var v = context.Vehicles.Where(x => x.RaceId == raceId).FirstOrDefault();
             Assert.AreEqual(raceId, v.RaceId);
             Assert.AreEqual("updatedType", v.Type);
@@ -232,7 +233,7 @@ namespace DakarRallyTests
                     var sc = new SportCar();
                     sc.RaceId = raceId;
                     sc.TeamName = "HeavyMalfunctionTeam100";
-                    sc.Type = "sportcar";
+                    sc.Type = "SPORTCAR";
                     sc.VehicleModel = "model1";
                     // Has heavy malfunction 100%
                     sc.HeavyMalfunctionProbability = 1.0;
@@ -243,7 +244,7 @@ namespace DakarRallyTests
                     var sc = new CrossMotorbike();
                     sc.RaceId = raceId;
                     sc.TeamName = "HeavyMalfunctionTeam0";
-                    sc.Type = "crossmotorbike";
+                    sc.Type = "CROSSMOTORBIKE";
                     sc.VehicleModel = "model1";
                     // Has heavy malfunction 0%
                     sc.HeavyMalfunctionProbability = 0.0;
@@ -254,9 +255,9 @@ namespace DakarRallyTests
                     var sc = new SportMotorbike();
                     sc.RaceId = raceId;
                     sc.TeamName = "Team" + i;
-                    sc.Type = "sportmotorbike";
+                    sc.Type = "SPORTMOTORBIKE";
                     sc.VehicleModel = "model1";
-                    sc.VehicleStatus = VehicleStatus.NoStatus;
+                    sc.VehicleStatus = VehicleStatus.NOSTATUS;
                     vehicles.Add(sc);
                 }
                 for (int i = 0; i < 5; i++)
@@ -264,7 +265,7 @@ namespace DakarRallyTests
                     var sc = new TerrainCar();
                     sc.RaceId = raceId;
                     sc.TeamName = "Team" + i;
-                    sc.Type = "terraincar";
+                    sc.Type = "TERRAINCAR";
                     sc.VehicleModel = "model1";
                     vehicles.Add(sc);
                 }
@@ -273,7 +274,7 @@ namespace DakarRallyTests
                     var sc = new Truck();
                     sc.RaceId = raceId;
                     sc.TeamName = "Team" + i;
-                    sc.Type = "truck";
+                    sc.Type = "TRUCK";
                     sc.VehicleModel = "model1";
                     vehicles.Add(sc);
                 }

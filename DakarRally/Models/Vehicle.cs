@@ -19,7 +19,6 @@ namespace DakarRally.Models
         /// Race id.
         /// </summary>
         [Required]
-        [Range(1970, 2050)]
         public long RaceId { get; set; }
 
         /// <summary>
@@ -49,13 +48,13 @@ namespace DakarRally.Models
         public DateTime VehicleManufaturingDate { get; set; }
 
         /// <summary>
-        /// Vehicle speed.
+        /// Vehicle speed [km].
         /// </summary>
         [NotMapped]
         public int VehicleSpeed { get; set; } = 0;
 
         /// <summary>
-        /// Light malfunction delay.
+        /// Light malfunction delay in hours.
         /// </summary>
         [NotMapped]
         public int LightMalfunctionDelay { get; set; } = 0;
@@ -110,6 +109,6 @@ namespace DakarRally.Models
         /// <summary>
         /// Vehicle status.
         /// </summary>
-        public VehicleStatus VehicleStatus { get; set; } = VehicleStatus.NoStatus;
+        public VehicleStatus VehicleStatus { get; set; } = VehicleStatus.NOSTATUS;
     }
 }

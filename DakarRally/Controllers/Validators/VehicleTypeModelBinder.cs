@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using static DakarRally.Helper.AppEnums;
 
 namespace DakarRally.Helper
 {
@@ -15,6 +16,12 @@ namespace DakarRally.Helper
     /// </summary>
     public class VehicleTypeModelBinder : IModelBinder
     {
+        #region Fields
+
+        private const string TYPE = "Type";
+
+        #endregion
+
         #region Public methods
 
         /// <summary>
@@ -34,25 +41,23 @@ namespace DakarRally.Helper
             try
             {
                 var jObject = Newtonsoft.Json.Linq.JObject.Parse(json.Result);
-                var type = jObject?.SelectToken("Type");
+                var type = jObject?.SelectToken(TYPE);
                 if (type != null)
                 {
                     obj = GetVehicle(type.ToString(), json.Result);
                 }
             }
-            catch (JsonReaderException) { throw new Exception("Json string is not valid!");  }
+            catch (JsonReaderException) { throw new Exception("Json string is not valid!"); }
             finally
             {
-                if (obj != null)
-                {
-                    bindingContext.Result = ModelBindingResult.Success(obj);
-                }
-                else
+                if (obj == null)
                 {
                     bindingContext.Result = ModelBindingResult.Failed();
+                    
                 }
+                bindingContext.Result = ModelBindingResult.Success(obj);
             }
-        
+
             return Task.CompletedTask;
         }
 
@@ -80,26 +85,27 @@ namespace DakarRally.Helper
         private Vehicle GetVehicle(string vehicle, string jsonResult)
         {
             VehicleFactory factory = null;
+            var vehicleType = (VehicleType)Enum.Parse(typeof(VehicleType), vehicle.ToUpperInvariant());
 
-            switch (vehicle.ToLower())
+            switch (vehicleType)
             {
-                case "sportcar":
+                case VehicleType.SPORTCAR:
                     factory = new SportCarFactory();
                     break;
-                case "terraincar":
+                case VehicleType.TERRAINCAR:
                     factory = new TerrainCarFactory();
                     break;
-                case "sportmotorbike":
+                case VehicleType.SPORTMOTORBIKE:
                     factory = new SportMotorbikeFactory();
                     break;
-                case "crossmotorbike":
+                case VehicleType.CROSSMOTORBIKE:
                     factory = new CrossMotorbikeFactory();
                     break;
-                case "truck":
+                case VehicleType.TRUCK:
                     factory = new TruckFactory();
                     break;
                 default:
-                    break;
+                    throw new InvalidStateException($"Not supported vehicle type: {vehicleType.ToString()}!");
             }
 
             return factory != null ? factory.GetVehicle(jsonResult) : throw new VehiclesNotFoundException("Vehicle id not found!");

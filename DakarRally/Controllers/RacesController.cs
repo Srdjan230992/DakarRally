@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using DakarRally.Services;
+using Microsoft.AspNetCore.Http;
 
 namespace DakarRally.Controllers
 {
@@ -43,40 +44,53 @@ namespace DakarRally.Controllers
         /// </summary>
         /// <param name="year">Race year.</param>
         /// <returns>Race informations.</returns>
-        // POST: api/races/1970
-        [HttpPost("/{id}")]
+        // POST: api/races/2021
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ValidateActionParameters]
-        public async Task<ActionResult<Race>> Race([Range(1970, 2050)] int id)
+        public async Task<ActionResult<Race>> CreateRace([Range(1970, 2050)][FromBody] int year)
         {
-            var race = new Race(id);
-            await _raceService.CreateRace(race);
-            return CreatedAtAction(nameof(Race), new { id = race.Year }, race);
+            var race = await _raceService.CreateRace(year);
+            return CreatedAtAction(nameof(CreateRaceResponse), race);
         }
 
         /// <summary>
         /// Add vehicle to the race.
         /// </summary>
+        /// <param name="raceId">Race id (year).</param>
         /// <param name="vehicle">New vehicle.</param>
         /// <returns>Vehicle added to the race.</returns>
-        // POST: api/races/vehicle
-        [HttpPost("vehicle")]
-        public async Task<ActionResult<VehicleResponse>> Vehicle([ModelBinder(BinderType = typeof(VehicleTypeModelBinder))][FromBody] Vehicle vehicle)
+        // POST: api/races/2021/vehicles
+        [HttpPost("{raceId}/vehicles")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ValidateActionParameters]
+        public async Task<ActionResult<VehiclesResponse>> AddVehicleToRace([Range(1970, 2050)] int raceId, [ModelBinder(BinderType = typeof(VehicleTypeModelBinder))][FromBody] Vehicle vehicleRequest)
         {
-            await _raceService.AddVehicleToRace(vehicle); 
-            return CreatedAtAction(nameof(CreateResponse), new { id = vehicle.Id }, vehicle);
+            var vehicle = await _raceService.AddVehicleToRace(vehicleRequest, raceId);
+            return CreatedAtAction(nameof(CreateVehicleResponse), vehicle);
         }
 
         /// <summary>
         /// Updates vehicle informations.
         /// </summary>
         /// <param name="vehicle">Vehicle informations.</param>
+        /// <param name="id">Vehicle id.</param>
         /// <returns>Updated vehicle informations.</returns>
-        // PUT: api/races/vehicle/
-        [HttpPut("vehicle")]
-        public async Task<IActionResult> VehicleInfo([ModelBinder(BinderType = typeof(VehicleTypeModelBinder))][FromBody] Vehicle vehicle)
+        // PUT: api/races/vehicles/1
+        [HttpPut("vehicles/{id}")]
+        [ProducesResponseType(StatusCodes.Status304NotModified)] 
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> UpdateVehicle([ModelBinder(BinderType = typeof(VehicleTypeModelBinder))][FromBody] Vehicle vehicle, int id)
         {
-            await _raceService.UpdateVehicleInfo(vehicle);
-            return Ok(new VehicleResponse(vehicle.TeamName, vehicle.VehicleModel, vehicle.VehicleManufaturingDate));
+            await _raceService.UpdateVehicleInfo(vehicle, id);
+            return Ok(new VehiclesResponse(vehicle.TeamName, vehicle.VehicleModel, vehicle.VehicleManufaturingDate));
         }
 
         /// <summary>
@@ -84,25 +98,31 @@ namespace DakarRally.Controllers
         /// </summary>
         /// <param name="id">Vehicle id.</param>
         /// <returns>Information if vehicle is deleted.</returns>
-        // DELETE: api/races/vehicle/5
-        [HttpDelete("vehicle/{id}")]
-        public async Task<ActionResult> Vehicle(long id)
+        // DELETE: api/races/vehicles/1
+        [HttpDelete("vehicles/{id}")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<ActionResult> DeleteVehicle(int id)
         {
             await _raceService.DeleteVehicle(id);
-            return Ok($"Vehicle with id: {id} is successfully deleted!");
+            return NoContent();
         }
 
         /// <summary>
         /// Starts the race.
         /// </summary>
-        /// <param name="raceId">Race id.</param>
-        // GET: api/races/2020/start
-        [HttpPost("/start")]
+        /// <param name="raceId">Race id (year).</param>
+        // PUT: api/races/2021/start
+        [HttpPut("/{year}/start")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [ValidateActionParameters]
-        public ActionResult StartRace([Range(1970, 2050)] [FromBody] int id)
+        public ActionResult StartRace([Range(1970, 2050)] int raceId)
         {
-            _raceService.StartRace(id);
-            return Ok($"Race with id: {id} is successfully finished.");
+            var race = _raceService.StartRace(raceId);
+            return Ok(race);
         }
 
         /// <summary>
@@ -110,26 +130,21 @@ namespace DakarRally.Controllers
         /// </summary>
         /// <param name="id">Race id.</param>
         /// <returns>The race.</returns>
-        // GET: api/races/2020
-        [HttpGet("/{id}")]
-        [ValidateActionParameters]
-        public ActionResult<Race> Race([Range(1970, 2050)] long id)
+        [HttpGet("response")]
+        public ActionResult<Race> CreateRaceResponse(Race race)
         {
-            var race = _raceService.FindRaceById(id);
-            return race != null ? Ok(race) : NotFound($"Race with id: {id} is not found!");
+            return race;
         }
 
         /// <summary>
-        /// Find vehicle by id.
+        /// Create respones.
         /// </summary>
         /// <param name="id">Vehicle id.</param>
         /// <returns>The vehicle.</returns>
-        // GET: api/vehicle/2
-        [HttpGet("vehicle/{id}")]
-        public async Task<ActionResult<VehicleResponse>> CreateResponse(long id)
+        [HttpGet("vehicles/response")]
+        public ActionResult<VehiclesResponse> CreateVehicleResponse(Vehicle vehicle)
         {
-            var vehicle = await _raceService.FindVehicleById(id);
-            return vehicle != null ? Ok(new VehicleResponse(vehicle.TeamName, vehicle.VehicleModel, vehicle.VehicleManufaturingDate)) : NotFound($"Vehicle with id: {id} is not found!");
+            return new VehiclesResponse(vehicle.TeamName, vehicle.VehicleModel, vehicle.VehicleManufaturingDate);
         }
 
         #endregion

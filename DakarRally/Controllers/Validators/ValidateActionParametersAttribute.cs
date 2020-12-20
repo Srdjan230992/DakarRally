@@ -2,9 +2,10 @@
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using System.Collections.Generic;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
+using static DakarRally.Helper.AppEnums;
 
 namespace DakarRally.Helper
 {
@@ -66,15 +67,16 @@ namespace DakarRally.Helper
     /// </summary>
     public class ValidateTypeParameterAttribute : ActionFilterAttribute
     {
+        private const string TYPE = "type";
+
         /// <inheritdoc/>
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
-            var types = new List<string>(3) { "cars", "trucks", "motorcycles" };
-            if (filterContext.ActionArguments.ContainsKey("type"))
+            if (filterContext.ActionArguments.ContainsKey(TYPE))
             {
-                string name = filterContext.ActionArguments["type"] as string;
+                string name = filterContext.ActionArguments[TYPE] as string;
 
-                if (name != null && !types.Contains(name))
+                if (name != null && !Enum.IsDefined(typeof(VehiclesType), name.ToUpper()))
                 {
                     filterContext.Result = new BadRequestObjectResult("The type must be cars, trucks or motorcycles!");
                 }
@@ -87,15 +89,16 @@ namespace DakarRally.Helper
     /// </summary>
     public class ValidateOrderParameterAttribute : ActionFilterAttribute
     {
+        private const string ORDER = "order";
+
         /// <inheritdoc/>
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
-            var types = new List<string>(3) { "asc", "desc" };
-            if (filterContext.ActionArguments.ContainsKey("order"))
+            if (filterContext.ActionArguments.ContainsKey(ORDER))
             {
-                string name = filterContext.ActionArguments["order"] as string;
+                string name = filterContext.ActionArguments[ORDER] as string;
 
-                if (name != null && !types.Contains(name))
+                if (name != null && !Enum.IsDefined(typeof(OrderType), name.ToUpper()))
                 {
                     filterContext.Result = new BadRequestObjectResult("The order must be asc or desc!");
                 }

@@ -37,6 +37,7 @@ namespace DakarRally
         {
             services.AddDbContext<VehicleDbContext>(opt =>
                                                opt.UseInMemoryDatabase("Vehicles"));
+
             services.AddControllers();
 
             services.AddScoped<IRaceInformationsService, RaceInformationsServiceImpl>();
@@ -59,7 +60,6 @@ namespace DakarRally
 
             if (env.IsDevelopment())
             {
-                //app.UseDeveloperExceptionPage();
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "DakarRally v1"));
             }

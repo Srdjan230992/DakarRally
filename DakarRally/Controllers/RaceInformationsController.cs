@@ -1,6 +1,7 @@
 ﻿using DakarRally.Helper;
 using DakarRally.Models;
 using DakarRally.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,7 @@ namespace DakarRally.Controllers
     /// <summary>
     /// The race informations controller.
     /// </summary>
-    [Route("api/")]
+    [Route("api/races")]
     [ApiController]
     public class RaceInformationsController : ControllerBase
     {
@@ -43,9 +44,13 @@ namespace DakarRally.Controllers
         /// Retrives leaderboard informations for all vehicles.
         /// </summary>
         /// <returns>List of vehicles with leaderboard informations.</returns>
-        // GET: api/leaderboard
+        // GET: api/races/leaderboard
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpGet("leaderboard")]
-        public ActionResult<List<Vehicle>> LeaderboardForAllVehicles()
+        public ActionResult<List<Vehicle>> FindLeaderboard()
         {
             return Ok(_raceInformationsService.GetLeaderboardForAllVehicles());
         }
@@ -55,10 +60,14 @@ namespace DakarRally.Controllers
         /// </summary>
         /// <param name="type">Vehicle type.</param>
         /// <returns>Vehicle with leaderboard informations.</returns>
-        // GET: api/?type=cars
-        [HttpGet]
+        // GET: api/races/leaderboard?type=cars
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [HttpGet("vehicles/leaderboard")]
         [ValidateTypeParameter]
-        public ActionResult<List<Vehicle>> LeaderboardForVehicle([FromQuery(Name = "type")] string type)
+        public ActionResult<List<Vehicle>> FindLeaderboardForVehicle([FromQuery(Name = "type")] string type)
         {
             return Ok(_raceInformationsService.GetLeaderboardForVehicle(type));
         }
@@ -68,9 +77,12 @@ namespace DakarRally.Controllers
         /// </summary>
         /// <param name="id">Vehicle id.</param>
         /// <returns>Vehicle statistics.</returns>
-        // GET: api/vehicles/2/statistics
+        // GET: api/races/vehicles/2/statistics
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpGet("vehicles/{id}/statistics")]
-        public ActionResult<VehicleStatistic> VehicleStatistics(long id)
+        public ActionResult<VehicleStatistic> FindVehicleStatistics(long id)
         {
             return Ok(_raceInformationsService.GetVehicleStatistics(id));
         }
@@ -81,9 +93,12 @@ namespace DakarRally.Controllers
         /// <param name="id">Race id (year).</param>
         /// <returns>Race status.</returns>
         // GET: api/races/2020/status
-        [HttpGet("races/{id}/status")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [HttpGet("{id}/status")]
         [ValidateActionParameters]
-        public ActionResult<RaceStatus> RaceStatus([Range(1970, 2050)] int id)
+        public ActionResult<RaceStatus> GetRaceStatus([Range(1970, 2050)] int id)
         {
             return Ok(_raceInformationsService.GetRaceStatus(id));
         }
@@ -94,10 +109,14 @@ namespace DakarRally.Controllers
         /// <param name="request">Filter informatiions.</param>
         /// <param name="order">Sort order (asc or desc).</param>
         /// <returns>Desired vehicles response.</returns>
-        // GET: api/vehicles?order=desc
+        // POST: api/races/vehicles?order=desc
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpPost("vehicles")]
         [ValidateOrderParameter]
-        public ActionResult<DesiredVehiclesResponse> FilterVehicles([FromBody] DesiredVehiclesRequest request, [FromQuery(Name = "order")] string order)
+        public ActionResult<FilteredVehiclesResponse> FilterVehicles([FromBody] VehiclesRequest request, [FromQuery(Name = "order")] string order)
         {
             return Ok(_raceInformationsService.FindVehicles(request, order));
         }

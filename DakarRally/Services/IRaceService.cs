@@ -11,34 +11,24 @@ namespace DakarRally.Services
         /// <summary>
         /// Creates a new race.
         /// </summary>
-        /// <param name="race">Race to create.</param>
-        public Task CreateRace(Race race);
-
-        /// <summary>
-        /// Find race by race id.
-        /// </summary>
-        /// <param name="raceId">Race id.</param>
-        /// <returns>Race with specified id.</returns>
-        public Task<Race> FindRaceById(long raceId);
+        /// <param name="year">Race year (id).</param>
+        /// <returns>Created race.</returns>
+        public Task<Race> CreateRace(int year);
 
         /// <summary>
         /// Add vehicle to the race.
         /// </summary>
         /// <param name="vehicle">The vehicle that will be added.</param>
-        public Task AddVehicleToRace(Vehicle vehicle);
-
-        /// <summary>
-        /// Find vehicle by vehicle id.
-        /// </summary>
-        /// <param name="vehicleId">Vehicle id.</param>
-        /// <returns>Vehicle for specified id.</returns>
-        public Task<Vehicle> FindVehicleById(long vehicleId);
+        /// <param name="raceId">The race id.</param>
+        /// <returns>Created vehicle.</returns>
+        public Task<Vehicle> AddVehicleToRace(Vehicle vehicle, int raceId);
 
         /// <summary>
         /// Update vehicle informations.
         /// </summary>
-        /// <param name="vehicle">Vehicle id.</param>
-        public Task UpdateVehicleInfo(Vehicle vehicle);
+        /// <param name="vehicle">Vehicle.</param>
+        /// <param name="id">Vehicle id.</param>
+        public Task UpdateVehicleInfo(Vehicle vehicle, long id);
 
         /// <summary>
         /// Delete vehicle.
@@ -49,6 +39,8 @@ namespace DakarRally.Services
         /// <summary>
         /// Starts the race.
         /// </summary>
-        public void StartRace(int raceID);
+        /// <param name="raceID">Vehicle id.</param>
+        /// <returns>The race.</returns>
+        public Race StartRace(int raceID);
     }
 }

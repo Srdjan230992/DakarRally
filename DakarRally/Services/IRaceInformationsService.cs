@@ -42,6 +42,6 @@ namespace DakarRally.Services
         /// <param name="filterData">Specified filter data.</param>
         /// <param name="order">Order (asc/desc).</param>
         /// <returns>Filter output data.</returns>
-        public DesiredVehiclesResponse FindVehicles(DesiredVehiclesRequest filterData, string order);
+        public FilteredVehiclesResponse FindVehicles(VehiclesRequest filterData, string order);
     }
 }
