@@ -1,0 +1,517 @@
+{
+	"info": {
+		"_postman_id": "d21cb4a3-b54b-446b-b686-1a1868fb150d",
+		"name": "DakarRallyCollection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "https://localhost:5001/api/races/",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "\"2021\"",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:5001/api/races/",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "5001",
+					"path": [
+						"api",
+						"races",
+						""
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "dddd",
+							"disabled": true
+						},
+						{
+							"key": "",
+							"value": "vvv",
+							"disabled": true
+						},
+						{
+							"key": "SortType",
+							"value": "descending",
+							"disabled": true
+						}
+					]
+				},
+				"description": "Creates race."
+			},
+			"response": []
+		},
+		{
+			"name": "https://localhost:5001/api/races/2021/vehicles",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"Type\": \"sportcar\",\r\n  \"TeamName\": \"tim2\",\r\n  \"VehicleModel\": \"model2\",\r\n  \"VehicleManufaturingDate\": \"2019-06-01T13:45:30\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:5001/api/races/2021/vehicles",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "5001",
+					"path": [
+						"api",
+						"races",
+						"2021",
+						"vehicles"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "dddd",
+							"disabled": true
+						},
+						{
+							"key": "",
+							"value": "vvv",
+							"disabled": true
+						},
+						{
+							"key": "SortType",
+							"value": "descending",
+							"disabled": true
+						}
+					]
+				},
+				"description": "Adding new vehicle to the race."
+			},
+			"response": []
+		},
+		{
+			"name": "https://localhost:5001/api/races/vehicles/31",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"Type\": \"sportcar\",\r\n  \"TeamName\": \"tim2new\",\r\n  \"VehicleModel\": \"model2new\",\r\n  \"VehicleManufaturingDate\": \"2020-06-01T13:45:30\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:5001/api/races/vehicles/31",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "5001",
+					"path": [
+						"api",
+						"races",
+						"vehicles",
+						"31"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "dddd",
+							"disabled": true
+						},
+						{
+							"key": "",
+							"value": "vvv",
+							"disabled": true
+						},
+						{
+							"key": "SortType",
+							"value": "descending",
+							"disabled": true
+						}
+					]
+				},
+				"description": "Update race."
+			},
+			"response": []
+		},
+		{
+			"name": "https://localhost:5001/api/races/vehicles/31",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:5001/api/races/vehicles/31",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "5001",
+					"path": [
+						"api",
+						"races",
+						"vehicles",
+						"31"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "dddd",
+							"disabled": true
+						},
+						{
+							"key": "",
+							"value": "vvv",
+							"disabled": true
+						},
+						{
+							"key": "SortType",
+							"value": "descending",
+							"disabled": true
+						}
+					]
+				},
+				"description": "Delete vehicle."
+			},
+			"response": []
+		},
+		{
+			"name": "https://localhost:5001/api/races/2020/start",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:5001/api/races/2020/start",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "5001",
+					"path": [
+						"api",
+						"races",
+						"2020",
+						"start"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "dddd",
+							"disabled": true
+						},
+						{
+							"key": "",
+							"value": "vvv",
+							"disabled": true
+						},
+						{
+							"key": "SortType",
+							"value": "descending",
+							"disabled": true
+						}
+					]
+				},
+				"description": "Start race."
+			},
+			"response": []
+		},
+		{
+			"name": "https://localhost:5001/api/races/vehicles/leaderboard",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:5001/api/races/vehicles/leaderboard",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "5001",
+					"path": [
+						"api",
+						"races",
+						"vehicles",
+						"leaderboard"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "dddd",
+							"disabled": true
+						},
+						{
+							"key": "",
+							"value": "vvv",
+							"disabled": true
+						},
+						{
+							"key": "SortType",
+							"value": "descending",
+							"disabled": true
+						}
+					]
+				},
+				"description": "Leaderboard for all vehicles for race."
+			},
+			"response": []
+		},
+		{
+			"name": "https://localhost:5001/api/races/vehicles/30/statistics",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:5001/api/races/vehicles/30/statistics",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "5001",
+					"path": [
+						"api",
+						"races",
+						"vehicles",
+						"30",
+						"statistics"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "dddd",
+							"disabled": true
+						},
+						{
+							"key": "",
+							"value": "vvv",
+							"disabled": true
+						},
+						{
+							"key": "SortType",
+							"value": "descending",
+							"disabled": true
+						}
+					]
+				},
+				"description": "Vehicle statistics."
+			},
+			"response": []
+		},
+		{
+			"name": "https://localhost:5001/api/races/leaderboard?type=cars",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:5001/api/races/leaderboard?type=cars",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "5001",
+					"path": [
+						"api",
+						"races",
+						"leaderboard"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "dddd",
+							"disabled": true
+						},
+						{
+							"key": "",
+							"value": "vvv",
+							"disabled": true
+						},
+						{
+							"key": "SortType",
+							"value": "descending",
+							"disabled": true
+						},
+						{
+							"key": "type",
+							"value": "cars"
+						}
+					]
+				},
+				"description": "Leaderboard for \"cars\" type."
+			},
+			"response": []
+		},
+		{
+			"name": "https://localhost:5001/api/races/2020/status",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:5001/api/races/2020/status",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "5001",
+					"path": [
+						"api",
+						"races",
+						"2020",
+						"status"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "dddd",
+							"disabled": true
+						},
+						{
+							"key": "",
+							"value": "vvv",
+							"disabled": true
+						},
+						{
+							"key": "SortType",
+							"value": "descending",
+							"disabled": true
+						}
+					]
+				},
+				"description": "Vehicle status."
+			},
+			"response": []
+		},
+		{
+			"name": "https://localhost:5001/api/races/vehicles?order=desc",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \r\n    \"Team\": \"Team1\",\r\n    \"Model\": {\"Field\":\"model1\", \"LogicOperation\":\"or\"},\r\n    \"Status\": {\"Field\":\"ghgh\", \"LogicOperation\":\"or\"},\r\n    \"ManufacturingDate\": {\"Field\":\"2009-06-01T13:45:30\", \"LogicOperation\":\"or\"},\r\n    \"Distance\": {\"Field\":\"hbhjj\", \"LogicOperation\":\"or\"}  \r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:5001/api/races/vehicles?order=desc",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "5001",
+					"path": [
+						"api",
+						"races",
+						"vehicles"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "dddd",
+							"disabled": true
+						},
+						{
+							"key": "",
+							"value": "vvv",
+							"disabled": true
+						},
+						{
+							"key": "SortType",
+							"value": "descending",
+							"disabled": true
+						},
+						{
+							"key": "order",
+							"value": "desc"
+						}
+					]
+				},
+				"description": "Find vehicles."
+			},
+			"response": []
+		}
+	]
+}

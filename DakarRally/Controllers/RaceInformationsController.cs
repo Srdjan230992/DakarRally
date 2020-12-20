@@ -50,7 +50,7 @@ namespace DakarRally.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpGet("leaderboard")]
-        public ActionResult<List<Vehicle>> FindLeaderboard()
+        public ActionResult<List<LeaderboardResponse>> FindLeaderboard()
         {
             return Ok(_raceInformationsService.GetLeaderboardForAllVehicles());
         }
@@ -67,7 +67,7 @@ namespace DakarRally.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpGet("vehicles/leaderboard")]
         [ValidateTypeParameter]
-        public ActionResult<List<Vehicle>> FindLeaderboardForVehicle([FromQuery(Name = "type")] string type)
+        public ActionResult<List<LeaderboardResponse>> FindLeaderboardForVehicle([FromQuery(Name = "type")] string type)
         {
             return Ok(_raceInformationsService.GetLeaderboardForVehicle(type));
         }

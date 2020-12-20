@@ -43,25 +43,26 @@ namespace DakarRally.Services
         #region Public methods
 
         /// <inheritdoc/>
-        public List<Vehicle> GetLeaderboardForAllVehicles()
+        public List<LeaderboardResponse> GetLeaderboardForAllVehicles()
         {
             var race = FindRaceInRaunningState();
-            return FindVehiclesFromRace(race.Year).OrderBy(x => x.Rank).ToList();
+            var vehicles = FindVehiclesFromRace(race.Year).OrderBy(x => x.Rank).ToList();
+            return CreateleaderboardResponse(vehicles);
         }
 
         /// <inheritdoc/>
-        public List<Vehicle> GetLeaderboardForVehicle(string type)
+        public List<LeaderboardResponse> GetLeaderboardForVehicle(string type)
         {
             var race = FindRaceInRaunningState();
             var vehicleType = (VehiclesType)Enum.Parse(typeof(VehiclesType), type.ToUpperInvariant());
             switch (vehicleType)
             {
                 case VehiclesType.CARS:
-                    return FindVehiclesFromRace(race.Year).OrderBy(x => x.Rank).Where(t => t.Type.ToLower() == SPORTCAR || t.Type.ToLower() == TERRAINCAR)?.ToList();
+                    return CreateleaderboardResponse(FindVehiclesFromRace(race.Year).OrderBy(x => x.Rank).Where(t => t.Type.ToLower() == SPORTCAR || t.Type.ToLower() == TERRAINCAR)?.ToList());
                 case VehiclesType.MOTORCYCLES:
-                    return FindVehiclesFromRace(race.Year).OrderBy(x => x.Rank).Where(t => t.Type.ToLower() == SPORTMOTORBIKE || t.Type.ToLower() == CROSSMOTORBIKE)?.ToList();
+                    return CreateleaderboardResponse(FindVehiclesFromRace(race.Year).OrderBy(x => x.Rank).Where(t => t.Type.ToLower() == SPORTMOTORBIKE || t.Type.ToLower() == CROSSMOTORBIKE)?.ToList());
                 case VehiclesType.TRUCKS:
-                    return FindVehiclesFromRace(race.Year).OrderBy(x => x.Rank).Where(t => t.Type.ToLower() == TRUCK)?.ToList();
+                    return CreateleaderboardResponse(FindVehiclesFromRace(race.Year).OrderBy(x => x.Rank).Where(t => t.Type.ToLower() == TRUCK)?.ToList());
                 default:
                     throw new Exception($"[{nameof(RaceInformationsServiceImpl)}] Invalid race type: {type}!");
             }
@@ -80,9 +81,10 @@ namespace DakarRally.Services
             ValidateFilterParameters(filterData, order);
 
             var vehiclesByTeamName = SortData(order, dakarRally.Vehicles.Get(x => x.TeamName == filterData.Team).AsQueryable())?.ToList();
-            var vehiclesByModel = SortData(order, FilterData(filterData.Model.LogicOperation, vehiclesByTeamName, dakarRally.Vehicles.Get(x => x.VehicleModel == filterData.Model.Field).AsQueryable()).AsQueryable())?.ToList();
-            var vehiclesByStatus = SortData(order, FilterData(filterData.Status.LogicOperation, vehiclesByModel, dakarRally.Vehicles.Get(x => x.VehicleStatus.ToString() == filterData.Status.Field).AsQueryable()).AsQueryable())?.ToList();
-            var vehiclesByDistance = SortData(order, FilterData(filterData.Distance.LogicOperation, vehiclesByStatus, dakarRally.Vehicles.Get(x => x.PassedDistance.ToString() == filterData.Distance.Field).AsQueryable()).AsQueryable())?.ToList();
+            var vehiclesByModel = SortData(order, FilterData(filterData.Model.LogicOperation, vehiclesByTeamName, dakarRally.Vehicles.Get(x => x.VehicleModel == filterData.Model.Field)).AsQueryable())?.ToList();
+            var vehiclesByManDate = SortData(order, FilterData(filterData.Model.LogicOperation, vehiclesByModel, dakarRally.Vehicles.Get(x => x.VehicleModel == filterData.ManufacturingDate.Field)).AsQueryable())?.ToList();
+            var vehiclesByStatus = SortData(order, FilterData(filterData.Status.LogicOperation, vehiclesByManDate, dakarRally.Vehicles.Get(x => x.VehicleStatus.ToString() == filterData.Status.Field)).AsQueryable())?.ToList();
+            var vehiclesByDistance = SortData(order, FilterData(filterData.Distance.LogicOperation, vehiclesByStatus, dakarRally.Vehicles.Get(x => x.PassedDistance.ToString() == filterData.Distance.Field)).AsQueryable())?.ToList();
 
             var filterOutputModel = new FilteredVehiclesResponse();
             filterOutputModel.Count = vehiclesByDistance?.Count();
@@ -169,7 +171,7 @@ namespace DakarRally.Services
         /// <param name="firstFilterData">First list for filtering.</param>
         /// <param name="secondFilterData">Second list for filtering.</param>
         /// <returns>Filter results.</returns>
-        private IEnumerable<Vehicle> FilterData(string operation, IEnumerable<Vehicle> firstFilterData, IQueryable<Vehicle> secondFilterData)
+        private IEnumerable<Vehicle> FilterData(string operation, IEnumerable<Vehicle> firstFilterData, IEnumerable<Vehicle> secondFilterData)
         {
             return operation.ToLowerInvariant() == AND ? firstFilterData.Intersect(secondFilterData) : firstFilterData.Union(secondFilterData);
         }
@@ -207,6 +209,22 @@ namespace DakarRally.Services
             {
                 throw new ArgumentNullException($"[{nameof(RaceInformationsServiceImpl)}] All filter criterias need to be entered!");
             }
+        }
+
+        /// <summary>
+        /// Creates leaderboard response.
+        /// </summary>
+        /// <param name="vehicles">List of vegicles.</param>
+        /// <returns>Leaderbord responses.</returns>
+        private List<LeaderboardResponse> CreateleaderboardResponse(List<Vehicle> vehicles)
+        {
+            var response = new List<LeaderboardResponse>(vehicles.Count);
+            foreach(var vehicle in vehicles)
+            {
+                response.Add(new LeaderboardResponse(vehicle.TeamName, vehicle.VehicleModel, vehicle.VehicleManufaturingDate, vehicle.PassedDistance, vehicle.Rank, vehicle.VehicleStatus.ToString(), vehicle.IsLightMalfunctionOccured, vehicle.IsHeavyMalfunctionOccured));
+            }
+
+            return response;
         }
 
         #endregion

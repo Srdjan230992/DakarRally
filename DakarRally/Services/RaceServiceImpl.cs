@@ -87,7 +87,7 @@ namespace DakarRally.Services
         {
             lock (raceLock)
             {
-                _logger.LogInformation($"[{nameof(RaceServiceImpl)}] Race with {raceId} rtarted.");
+                _logger.LogInformation($"[{nameof(RaceServiceImpl)}] Race with {raceId} started.");
 
                 if (CheckIfAnyRaceIsRunning()) throw new InvalidStateException($"[{nameof(RaceServiceImpl)}] Any race is already running!");
 
@@ -238,6 +238,8 @@ namespace DakarRally.Services
             {
                 vehicle.IsHeavyMalfunctionOccured = true;
                 vehicle.VehicleStatus = VehicleStatus.BREAKDOWN;
+                vehicle.VehicleManufaturingDate = DateTime.Now.ToLocalTime();
+                vehicle.Rank = 0;
                 return true;
             }
             return false;
@@ -253,6 +255,7 @@ namespace DakarRally.Services
             if (random.NextDouble() < vehicle.LightMalfunctionProbability)
             {
                 vehicle.IsLightMalfunctionOccured = true;
+                vehicle.VehicleManufaturingDate = DateTime.Now.ToLocalTime();
                 return true;
             }
             return false;

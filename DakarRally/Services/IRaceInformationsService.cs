@@ -12,15 +12,15 @@ namespace DakarRally.Services
         /// <summary>
         /// Retrives leaderboard data for all vehicles.
         /// </summary>
-        /// <returns>List of vehicles.</returns>
-        public List<Vehicle> GetLeaderboardForAllVehicles();
+        /// <returns>List of vehicle responses.</returns>
+        public List<LeaderboardResponse> GetLeaderboardForAllVehicles();
 
         /// <summary>
         /// Retrives leaderboard data for vehicles with specified type.
         /// </summary>
         /// <param name="type">Vehicle type.</param>
-        /// <returns>List of vehicles.</returns>
-        public List<Vehicle> GetLeaderboardForVehicle(string type);
+        /// <returns>List of vehicle responses.</returns>
+        public List<LeaderboardResponse> GetLeaderboardForVehicle(string type);
 
         /// <summary>
         /// Retrives vehicle statistics data.

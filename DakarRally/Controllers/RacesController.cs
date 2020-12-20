@@ -114,14 +114,14 @@ namespace DakarRally.Controllers
         /// </summary>
         /// <param name="raceId">Race id (year).</param>
         // PUT: api/races/2021/start
-        [HttpPut("/{year}/start")]
+        [HttpPut("{year}/start")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ValidateActionParameters]
-        public ActionResult StartRace([Range(1970, 2050)] int raceId)
+        public ActionResult StartRace([Range(1970, 2050)] int year)
         {
-            var race = _raceService.StartRace(raceId);
+            var race = _raceService.StartRace(year);
             return Ok(race);
         }
 
