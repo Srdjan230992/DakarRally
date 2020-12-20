@@ -19,3 +19,4 @@ Implementation of Dakar Rally real-time simulation. Simulation has cars, trucks 
 * 1 hour is considered as 1 second in simulation.
 * Leaderboard can be presented only when race is in running state.
 * In the simulation it is considered that the vehicles are always moving at maximum speed.
+* It is possible to hold one race in one year.
