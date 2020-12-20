@@ -9,7 +9,7 @@ using System.IO;
 using System.Threading.Tasks;
 using static DakarRally.Helper.AppEnums;
 
-namespace DakarRally.Helper
+namespace DakarRally.Controllers
 {
     /// <summary>
     /// VehicleTypeModelBinder class.

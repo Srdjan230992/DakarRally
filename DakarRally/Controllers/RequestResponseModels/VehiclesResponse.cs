@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DakarRally.Helper
+namespace DakarRally.Controllers
 {
     /// <summary>
     /// VehicleResponse class;

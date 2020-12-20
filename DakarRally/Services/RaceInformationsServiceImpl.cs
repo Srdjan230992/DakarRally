@@ -1,4 +1,5 @@
-﻿using DakarRally.Exceptions;
+﻿using DakarRally.Controllers;
+using DakarRally.Exceptions;
 using DakarRally.Helper;
 using DakarRally.Models;
 using DakarRally.Repository;
@@ -214,7 +215,7 @@ namespace DakarRally.Services
         /// <summary>
         /// Creates leaderboard response.
         /// </summary>
-        /// <param name="vehicles">List of vegicles.</param>
+        /// <param name="vehicles">List of vehicles.</param>
         /// <returns>Leaderbord responses.</returns>
         private List<LeaderboardResponse> CreateleaderboardResponse(List<Vehicle> vehicles)
         {

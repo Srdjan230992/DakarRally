@@ -1,7 +1,6 @@
 ﻿using System;
-using static DakarRally.Helper.AppEnums;
 
-namespace DakarRally.Helper
+namespace DakarRally.Controllers
 {
     /// <summary>
     /// LeaderboardResponse class;
@@ -16,8 +15,8 @@ namespace DakarRally.Helper
         private int _distance;
         private int _rank;
         private string _status;
-        private bool _IsLightMalfunctionOccured;
-        private bool _IsHeavyMalfunctionOccured;
+        private bool _isLightMalfunctionOccured;
+        private bool _isHeavyMalfunctionOccured;
 
         #endregion
 
@@ -29,6 +28,11 @@ namespace DakarRally.Helper
         /// <param name="teamName">Team name.</param>
         /// <param name="vehicleModel">Vehicle model.</param>
         /// <param name="vehicleManufacturingDate">Vehicle manufacturing date.</param>
+        /// <param name="distance">Passed distance.</param>
+        /// <param name="rank">Vehicle rank in the race.</param>
+        /// <param name="status">Vehicle status.</param>
+        /// <param name="isLightMalfunctionOccured">Is light malfunction occured indication.</param>
+        /// <param name="isHeavyMalfunctionOccured">Is heavy malfunction occured indication.</param>
         public LeaderboardResponse(string teamName, string vehicleModel, DateTime vehicleManufacturingDate, int distance, int rank, string status, bool isLightMalfunctionOccured, bool isHeavyMalfunctionOccured)
         {
             _teamName = teamName;
@@ -37,8 +41,8 @@ namespace DakarRally.Helper
             _distance = distance;
             _rank = rank;
             _status = status;
-            _IsLightMalfunctionOccured = isLightMalfunctionOccured;
-            _IsHeavyMalfunctionOccured = isHeavyMalfunctionOccured;
+            _isLightMalfunctionOccured = isLightMalfunctionOccured;
+            _isHeavyMalfunctionOccured = isHeavyMalfunctionOccured;
         }
 
         #endregion
@@ -78,12 +82,12 @@ namespace DakarRally.Helper
         /// <summary>
         /// Is light malfunction ocuured indication.
         /// </summary>
-        public bool IsLightMalfunctionOccured { get { return _IsLightMalfunctionOccured; } set { _IsLightMalfunctionOccured = value; } }
+        public bool IsLightMalfunctionOccured { get { return _isLightMalfunctionOccured; } set { _isLightMalfunctionOccured = value; } }
 
         /// <summary>
         /// Is heavy malfunction ocuured indication.
         /// </summary>
-        public bool IsHeavyMalfunctionOccured { get { return _IsHeavyMalfunctionOccured; } set { _IsHeavyMalfunctionOccured = value; } }
+        public bool IsHeavyMalfunctionOccured { get { return _isHeavyMalfunctionOccured; } set { _isHeavyMalfunctionOccured = value; } }
 
         #endregion
     }

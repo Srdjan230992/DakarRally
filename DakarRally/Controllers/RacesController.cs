@@ -1,10 +1,10 @@
 ﻿using DakarRally.Models;
-using DakarRally.Helper;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using DakarRally.Services;
 using Microsoft.AspNetCore.Http;
+using DakarRally.Controller;
 
 namespace DakarRally.Controllers
 {
@@ -60,7 +60,7 @@ namespace DakarRally.Controllers
         /// Add vehicle to the race.
         /// </summary>
         /// <param name="raceId">Race id (year).</param>
-        /// <param name="vehicle">New vehicle.</param>
+        /// <param name="vehicleRequest">New vehicle.</param>
         /// <returns>Vehicle added to the race.</returns>
         // POST: api/races/2021/vehicles
         [HttpPost("{raceId}/vehicles")]

@@ -7,7 +7,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using static DakarRally.Helper.AppEnums;
 
-namespace DakarRally.Helper
+namespace DakarRally.Controller
 {
     /// <summary>
     /// ValidateActionParametersAttribute class.

@@ -1,7 +1,9 @@
-﻿namespace DakarRally.Helper
+﻿using DakarRally.Helper;
+
+namespace DakarRally.Controllers
 {
     /// <summary>
-    /// FilterData class.
+    /// VehiclesRequest class.
     /// </summary>
     public class VehiclesRequest
     {

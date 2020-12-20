@@ -1,10 +1,10 @@
 ﻿using DakarRally.Models;
 using System.Collections.Generic;
 
-namespace DakarRally.Helper
+namespace DakarRally.Controllers
 {
     /// <summary>
-    /// FilterOutputModel class.
+    /// FilteredVehiclesResponse class.
     /// </summary>
     public class FilteredVehiclesResponse
     {

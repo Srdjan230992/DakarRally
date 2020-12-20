@@ -1,5 +1,5 @@
-﻿using DakarRally.Helper;
-using DakarRally.Models;
+﻿using DakarRally.Controller;
+using DakarRally.Helper;
 using DakarRally.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -59,8 +59,8 @@ namespace DakarRally.Controllers
         /// Retrives leaderboard informations for specific vehicle type.
         /// </summary>
         /// <param name="type">Vehicle type.</param>
-        /// <returns>Vehicle with leaderboard informations.</returns>
-        // GET: api/races/leaderboard?type=cars
+        /// <returns>Vehicles with leaderboard informations.</returns>
+        // GET: api/races/vehicles/leaderboard?type=cars
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
