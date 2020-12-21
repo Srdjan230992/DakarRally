@@ -83,7 +83,7 @@ namespace DakarRally.Services
 
             var vehiclesByTeamName = SortData(order, dakarRally.Vehicles.Get(x => x.TeamName == filterData.Team).AsQueryable())?.ToList();
             var vehiclesByModel = SortData(order, FilterData(filterData.Model.LogicOperation, vehiclesByTeamName, dakarRally.Vehicles.Get(x => x.VehicleModel == filterData.Model.Field)).AsQueryable())?.ToList();
-            var vehiclesByManDate = SortData(order, FilterData(filterData.Model.LogicOperation, vehiclesByModel, dakarRally.Vehicles.Get(x => x.VehicleModel == filterData.ManufacturingDate.Field)).AsQueryable())?.ToList();
+            var vehiclesByManDate = SortData(order, FilterData(filterData.ManufacturingDate.LogicOperation, vehiclesByModel, dakarRally.Vehicles.Get(x => x.VehicleModel == filterData.ManufacturingDate.Field)).AsQueryable())?.ToList();
             var vehiclesByStatus = SortData(order, FilterData(filterData.Status.LogicOperation, vehiclesByManDate, dakarRally.Vehicles.Get(x => x.VehicleStatus.ToString() == filterData.Status.Field)).AsQueryable())?.ToList();
             var vehiclesByDistance = SortData(order, FilterData(filterData.Distance.LogicOperation, vehiclesByStatus, dakarRally.Vehicles.Get(x => x.PassedDistance.ToString() == filterData.Distance.Field)).AsQueryable())?.ToList();
 
